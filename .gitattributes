@@ -1,0 +1,13 @@
+# Keeps the dist archive to the library itself. Conformance is proven in the
+# mirror repository, not in every consumer's vendor/ directory — see the
+# private source repository's release-pipeline design, §2.
+/.github         export-ignore
+/tests           export-ignore
+/spec            export-ignore
+/bin             export-ignore
+/phpunit.xml     export-ignore
+/phpstan.neon.dist export-ignore
+/phpcs.xml       export-ignore
+/pint.json       export-ignore
+/rector.php      export-ignore
+/.gitattributes  export-ignore

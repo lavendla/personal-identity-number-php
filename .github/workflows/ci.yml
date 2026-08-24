@@ -1,0 +1,28 @@
+name: ci
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+permissions:
+  contents: read
+
+jobs:
+  conformance:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.4'
+          coverage: none
+      - run: composer install --no-interaction --prefer-dist
+      - name: The corpus resolves as recorded
+        run: ./vendor/bin/phpunit
+      # This package's output matches the snapshot both runtimes agreed on in the
+      # source repository, which is transitive agreement with the TypeScript
+      # package. The cross-runtime comparison itself cannot run here — it needs
+      # both runtimes and tooling that stays private.
+      - name: Output matches the agreed snapshot
+        run: php bin/dump-golden.php | diff - spec/golden.json

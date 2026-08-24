@@ -1,0 +1,20 @@
+{
+  "name": "lavendla/personal-identity-number",
+  "description": "Validation, formatting and classification of personal identity numbers for Sweden and Denmark",
+  "type": "library",
+  "license": "MIT",
+  "keywords": ["personnummer", "samordningsnummer", "organisationsnummer", "cpr", "sweden", "denmark", "identity"],
+  "homepage": "https://github.com/lavendla/personal-identity-number-php",
+  "require": { "php": ">=8.4" },
+  "require-dev": {
+    "laravel/pint": "^1.30",
+    "phpstan/phpstan": "^2.2",
+    "phpunit/phpunit": "^11.0",
+    "rector/rector": "^2.6",
+    "squizlabs/php_codesniffer": "^4.0"
+  },
+  "autoload": { "psr-4": { "Lavendla\\PersonalIdentityNumber\\": "src/" } },
+  "autoload-dev": { "psr-4": { "Lavendla\\PersonalIdentityNumber\\Tests\\": "tests/" } },
+  "config": { "sort-packages": true },
+  "minimum-stability": "stable"
+}

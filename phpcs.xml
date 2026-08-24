@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- @see https://pear.php.net/manual/en/package.php.php-codesniffer.annotated-ruleset.php -->
+<ruleset name="Lavendla">
+    <file>src/</file>
+    <file>tests/</file>
+    <file>bin/</file>
+
+    <!-- Exclude vendors, etc. -->
+    <exclude-pattern>vendor/*</exclude-pattern>
+    <exclude-pattern>node_modules/*</exclude-pattern>
+
+    <rule ref="Generic.Files.LineLength">
+        <properties>
+            <property name="lineLimit" value="120"/>
+            <property name="absoluteLineLimit" value="0"/>
+            <property name="ignoreComments" value="true"/>
+        </properties>
+    </rule>
+
+    <!-- Case functions: no legitimate byte-oriented use in this codebase. -->
+    <rule ref="Generic.PHP.ForbiddenFunctions">
+        <properties>
+            <property name="forbiddenFunctions" type="array">
+                <element key="strtolower" value="mb_strtolower"/>
+                <element key="strtoupper" value="mb_strtoupper"/>
+                <element key="ucfirst"    value="mb_ucfirst"/>
+                <element key="lcfirst"    value="mb_lcfirst"/>
+            </property>
+        </properties>
+    </rule>
+</ruleset>

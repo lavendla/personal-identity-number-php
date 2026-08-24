@@ -1,0 +1,57 @@
+{
+  "preset": "laravel",
+  "rules": {
+    "simplified_null_return": false,
+    "php_unit_attributes": true,
+    "explicit_string_variable": true,
+    "logical_operators": true,
+    "fully_qualified_strict_types": true,
+    "no_useless_else": true,
+    "single_line_empty_body": true,
+    "trailing_comma_in_multiline": {
+      "elements": ["arguments", "arrays", "match", "parameters"]
+    },
+    "new_with_parentheses": {
+      "named_class": true,
+      "anonymous_class": false
+    },
+    "new_expression_parentheses": {
+      "use_parentheses": false
+    },
+    "method_argument_space": {
+      "on_multiline": "ensure_fully_multiline",
+      "keep_multiple_spaces_after_comma": false
+    },
+    "concat_space": {
+      "spacing": "one"
+    },
+    "binary_operator_spaces": {
+      "operators": {
+        "=>": "align"
+      }
+    },
+    "function_declaration": {
+      "closure_fn_spacing": "none"
+    },
+    "php_unit_method_casing": {
+      "case": "camel_case"
+    },
+    "phpdoc_align": {
+      "align": "left",
+      "spacing": {
+        "param": 1
+      }
+    },
+    "class_attributes_separation": {
+      "elements": {
+        "const": "none",
+        "method": "one",
+        "property": "none",
+        "trait_import": "none"
+      }
+    },
+    "single_import_per_statement": {
+      "group_to_single_imports": false
+    }
+  }
+}
