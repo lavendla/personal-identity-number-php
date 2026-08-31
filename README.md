@@ -136,17 +136,21 @@ number. Pass residence instead of issuing country and you get wrong data
 silently: this is exactly how 261 rows in a production system came to be
 stored as Swedish when they are not.
 
-Sweden and Denmark both have parsing logic, and that makes the responsibility
-sharper rather than softer: **the two collide**, and Denmark has no checksum
-to catch a Swedish number handed to it. Passing the wrong country will usually
-succeed and give you a plausible, wrong birth date. See the Denmark section
-below. Supplying the correct issuing country is entirely the caller's
-responsibility.
+All four countries have parsing logic, and that makes the responsibility
+sharper rather than softer: **Sweden and Denmark collide**, and Denmark has no
+checksum to catch a Swedish number handed to it. **Denmark and Finland collide
+too** — a Finnish code whose intermediate character is `-` and whose control
+character is a digit is character-for-character a Danish CPR number. Passing
+the wrong country will usually succeed and give you a plausible, wrong birth
+date. See the Denmark section below. Supplying the correct issuing country is
+entirely the caller's responsibility.
 
-Norway and Finland are **recognized but not supported**, which is a third state
-worth understanding — see the section below. It is also the closest thing this
-package has to a wrong-country alarm: hand a Norwegian number to Sweden and the
-answer names Norway rather than shrugging.
+The closest thing this package has to a wrong-country alarm is
+[`recognizedCountry`](#recognizedcountry-a-hint-never-a-guarantee): hand a
+Finnish code to Sweden and the answer names Finland rather than shrugging. It
+is advisory and it is deliberately quiet — it names a country only when that
+country's own scheme would genuinely accept the value, never on a shape match
+alone.
 
 ## `referenceDate` is required, and this package never calls the system clock
 
@@ -356,11 +360,13 @@ diff and therefore a spec major version bump.
 | `SeCoordinationNumber` | Sweden | Implemented, including partial birth dates — month `00` and day `60`, both drawn from Skatteverket's published coordination-number datasets |
 | `SeOrganizationNumber` | Sweden | Implemented. Validates the third-digit rule as well as Luhn, canonicalises with the `16` prefix, and yields neither a birth date nor a gender |
 | `DkCprNumber` | Denmark | Implemented. **Read the Denmark section below before relying on `validates()` for it** |
+| `NoNationalIdentityNumber` | Norway | Implemented — Skatteetaten's fødselsnummer. No publicly citable *ordinary* test number exists, so every safely constructible value for this scheme carries Skatteetaten/Digdir's synthetic `+80` month convention; see `allowSyntheticNumbers` |
+| `NoDNumber` | Norway | Implemented — Skatteetaten's D-number, issued to people not resident in Norway. Same layout as `NoNationalIdentityNumber` plus a `+40` day offset and its own century table |
+| `FiPersonalIdentityCode` | Finland | Implemented — DVV's personal identity code. Eleven characters, and the seventh is the century: `+` for the 1800s, `-` or `Y`/`X`/`W`/`V`/`U` for the 1900s, `A`–`F` for the 2000s, per decree 690/2022. **The marker stays in the canonical form**, because a Finnish code is not unique without it |
 
-**Norway and Finland have no `Scheme` member, and that is the point.** They are
-recognize-only: a value matching either shape is refused by name rather than
-parsed, so no `Scheme` exists for something that never produces a number. See the
-recognize-only section below.
+Every country the `Country` enum has now parses. There is no recognize-only
+country left, which means `ParseFailure::CountryNotSupported` is currently
+unreachable — see the [`ParseFailure`](#parsefailure) table.
 
 ## `ParseFailure`
 
@@ -371,16 +377,16 @@ never the raw input, masked or otherwise.
 | Member | Meaning |
 |---|---|
 | `NotAnIdentityNumber` | No scheme matched and nothing was recognized |
-| `UnsupportedScheme` | Recognized as a foreign scheme, and the recognized country is available via `ParseOutcome::recognizedCountry()`. Produced for Norwegian and Finnish values |
-| `CountryNotSupported` | The country **you asked for** has no scheme. Distinct from `UnsupportedScheme`, which is about the value: pass `Country::Norway` and you get this, pass a Norwegian value as Swedish and you get that |
+| `UnsupportedScheme` | No country actually consulted accepted the value, but a country not consulted does — genuinely, by a real parse. `ParseOutcome::recognizedCountry()` always names that country here: this failure is reported precisely because one was found — see [`recognizedCountry`](#recognizedcountry-a-hint-never-a-guarantee) below for when the hint rides along with a *different*, more specific failure instead |
+| `CountryNotSupported` | The country **you asked for** has no scheme. **Currently unreachable**: every `Country` member has a scheme, so nothing produces this today. It remains in the enum because the next country added will have a `Country` member before it has a scheme, and removing a public enum case is a breaking change either way |
 | `ChecksumMismatch` | Shape and date are valid, the check digit is not |
 | `ImpossibleDate` | The encoded date does not exist |
 | `ImplausibleBirthDate` | The date exists, but the resolved birth year is before the scheme's floor of 1800. Deliberately distinct from `ImpossibleDate` — "that date does not exist" and "that date exists but nobody alive was born then" are different facts, and a consumer bucketing contaminated data needs to tell them apart |
 | `FutureBirthDate` | The resolved birth date is after the reference date |
 | `InvalidCharacter` | Input contains a character not in the allow table |
-| `SchemeNotAllowed` | A scheme matched but was disabled by options, or by a preset such as `parseForPerson()` |
-| `CenturyRequired` | Options carried no reference date, but the input has no century of its own |
-| `ReferenceDateRequired` | `Format::Short` (or `ageOn()`) was asked of an object with no reference date on it and none supplied at the call site |
+| `SchemeNotAllowed` | A scheme matched but was disabled by options, or by a preset such as `parseForPerson()`. Never carries `recognizedCountry` — see [`recognizedCountry`](#recognizedcountry-a-hint-never-a-guarantee): the asked country's own scheme would have parsed the value with different options, so the country was never in question |
+| `CenturyRequired` | Options carried no reference date, but the input has no century of its own. Never carries `recognizedCountry`, for the same reason as `SchemeNotAllowed` above |
+| `ReferenceDateRequired` | `Format::Short` (or `ageOn()`) was asked of an object with no reference date on it and none supplied at the call site. Also on the never-carries-`recognizedCountry` list, though unreachable from `explain()`/`parse()` today — it is thrown only by formatting, never by a scheme |
 
 ## Canonical forms
 
@@ -554,41 +560,109 @@ The check runs **after** the date is known to exist, never before: a date that
 never occurred is not made plausible by being recent, and reporting the floor for
 30 February would be actively misleading.
 
-## Norway and Finland: recognized, not supported
+## `recognizedCountry`: a hint, never a guarantee
 
-A value matching the Norwegian or Finnish shape is refused **by name**:
+Once every scheme actually consulted has refused a value, `ParseOutcome::recognizedCountry()`
+reports whether some other country would have a better answer — the country
+asked (or, with no country named, every country asked) is always excluded
+from its own hint, so "Sweden refused it and it looks Swedish" is never
+reported. It rides along with most failures that were actually returned, not
+only `UnsupportedScheme`: a Swedish ask that fails with `ChecksumMismatch` on
+a value Denmark's own scheme would accept still carries the hint.
 
 ```php
-$outcome = PersonalIdentityNumber::explain('13108633528', Country::Sweden, $options);
-$outcome->failure();           // ParseFailure::UnsupportedScheme
-$outcome->recognizedCountry(); // Country::Norway
+$outcome = PersonalIdentityNumber::explain('0104909989', Country::Sweden, $options);
+$outcome->failure();           // ParseFailure::ChecksumMismatch
+$outcome->recognizedCountry(); // Country::Denmark
 ```
 
-The distinction this exists to draw is *"we know what this is and do not support
-it"* versus *"we have no idea what this is"*. It is reported whether or not you
-named a country, because recognition is a claim about the value rather than about
-which registry refused it — and telling a caller who guessed Sweden that their
-value looks Norwegian is the most useful thing the package can say.
+**What "recognized" means differs by tier, and that difference is the whole
+point.** For a country that has a scheme — Sweden, Denmark, Norway and Finland,
+which is all of them today — this runs that country's own scheme, with the
+caller-narrowing `allow*` flags
+relaxed (`allowCoordinationNumber`, `allowOrganizationNumber`,
+`allowUnknownBirthNumber` — `SchemeNotAllowed` is suppressed outright below
+regardless), but the caller's own `referenceDate` and `allowSyntheticNumbers`
+passed through unchanged: those two define what the caller counts as an
+acceptable value in the first place rather than narrow the scope of the
+request, so relaxing either would answer a different question than the one
+actually asked. A synthetic Norwegian value therefore produces a Norwegian
+hint only if the caller opted into `allowSyntheticNumbers` themselves — on
+default options it is refused here exactly as the caller's own request would
+refuse it. It reports the country only if it genuinely accepts the value.
+Denmark above is a real hint: the same digits
+actually parse as a valid Danish CPR number once Denmark is the country
+asked. **Every country is now asked for real.** The second tier — a shape
+match against digit counts and separator positions, for a country with no
+scheme to consult — still exists in the code but has no country left to
+serve, and will not until a new country is added.
 
-Four properties are worth knowing before relying on it:
+Why two tiers rather than one shape test for every country: a shape test
+alone is far too permissive to serve as a hint at all. Sweden's shape matches
+essentially any six-to-twelve-digit numeric string — measured, 100% of
+ten-digit strings — where the real scheme accepting one requires a correct
+check digit (10%) and a real calendar date (0.4%). Reporting a country whose
+own scheme would reject the value outright is worse than reporting nothing:
+advisory means less certain than a parse, not unconstrained by one. The
+practical consequence: a Finnish-shaped code whose control character is wrong
+gets **no hint at all**, and neither does an eleven-digit string that fails
+Norway's modulus-11.
 
-- **Recognition is shape only.** Neither country's checksum is implemented and
-  neither value's date is validated, on purpose: a scheme that recognises and
-  refuses has no use for the difference between a valid foreign number and an
-  invalid one. An impossible Norwegian date is still reported as Norwegian.
-- **Nothing is derived.** No number is produced, so `detect()` returns an **empty
-  list** for a recognized foreign value. `explain()` is the only place the
-  recognition surfaces.
-- **A real parse always wins.** A Finnish code whose intermediate character is
-  `-` and whose control character is a digit is character-for-character a Danish
-  CPR number, and since Danish numbers have no checksum, most such codes are
-  valid Danish ones. They stay Danish. Measured across every written form of the
-  published corpus: 11,281 of 33,807 forms match a recognize-only shape, and none
-  of them reaches a caller as a recognition.
-- **Naming an unsupported country is a different failure.** Passing
-  `Country::Norway` yields `ParseFailure::CountryNotSupported` and no
-  recognition — you already know what the value is, and the answer is about the
-  country you asked for.
+**Three exceptions: `CenturyRequired`, `SchemeNotAllowed` and `ReferenceDateRequired`
+never carry the hint.** All three are statements about the *request*, not the
+value — the asked country's own scheme would have parsed the number given
+different options (a reference date, an `allow*` flag), so "you may have named
+the wrong country" would not be true. A Swedish coordination number missing
+its reference date fails `CenturyRequired`; it is still Swedish, just
+incompletely asked for, and `recognizedCountry()` is `null` even when the
+value is shape-valid Danish too.
+
+**Treat it as advisory even though it is a real parse.** A country's own
+scheme accepting a value under permissive options is not proof a bearer
+exists — only that the registry would not reject it outright the way the
+asked country did. It is a hint for a human deciding which country to ask
+next, not a fact to store, match records on, or branch application logic on
+as though it came from a parse.
+
+## Finland
+
+```php
+$number = PersonalIdentityNumber::parse('010280-952L', Country::Finland, $options);
+$number->canonical();                  // '010280-952L'
+$number->birthDate()->format('Y-m-d'); // '1980-02-01'
+$number->gender();                     // Gender::Female
+$number->format(Format::Display);      // '010280-952L'
+```
+
+Five things to know, and the first two are the ones that catch people out.
+
+- **The intermediate character is part of the identity, not punctuation.**
+  Decree 690/2022 added `Y`, `X`, `W`, `V` and `U` for 1900s births and `B`–`F`
+  for 2000s births, so that from 2023 a Finnish code is **no longer unique
+  without its seventh character**. `canonical()` therefore keeps it, and
+  `Format::Display` and `Format::Short` are the canonical form unchanged — there
+  is no separator to insert, because the marker already occupies the position one
+  would go. Stripping it to "normalise" a Finnish code merges two people.
+- **Denmark and Finland collide on the same eleven characters.** A Finnish code
+  whose marker is `-` and whose control character is a digit is exactly the
+  Danish `DDMMYY-SSSS` form, and since Denmark has no checksum, most such codes
+  are valid Danish numbers too — so `detect()` can return **two** candidates for
+  one input, with different birth dates. Measured across every written form of
+  the published corpus, 11,281 of 33,807 forms match the Finnish shape. Name the
+  country you mean.
+- **The control character is a modulus-31 lookup and it is enforced.** A wrong
+  one gives `ParseFailure::ChecksumMismatch`. The nine digits either side of the
+  marker are checksummed as a single number and the marker itself is skipped, so
+  the same nine digits carry the same control character under every marker.
+- **The individual number is not range-checked.** DVV states that "in practice,
+  all individual numbers issued are between 002 and 899", which is an
+  observation about issuance rather than a stated validity rule — and this
+  package enforces only stated rules, exactly as it does not enforce modulus-11
+  on a Danish number. A code with an individual number of 900–999 parses.
+- **The century is stated, never inferred**, so no Finnish accessor moves with
+  the reference date except the future-birth-date check. There is no
+  age-dependent output on a Finnish code at all: `Format::Short` never elides a
+  century and never throws `ReferenceDateRequired`.
 
 Finnish codes must be **uppercase**. Twenty-one of Finland's thirty-one control
 characters are letters, and the allow table carries them in uppercase only; a
@@ -621,12 +695,17 @@ Read this before relying on this package beyond what is listed above:
 - **`isPerson()` does not separate a sole proprietorship from a private
   individual**, because nothing in the digits does. See the sole-proprietorship
   section — this is the limitation most often mistaken for a bug.
-- **Recognition of Norwegian and Finnish values is shape-only.** No checksum, no
-  date validation. A value reported as Norwegian may not be a real Norwegian
-  number, only a Norwegian-shaped one.
-- **A lowercase Finnish code is `InvalidCharacter`, not a recognition.** The
-  allow table carries Finland's letters in uppercase only and there is no case
-  folding.
+- **Denmark and Finland collide, and `validates()` cannot warn you.** Most
+  Finnish codes with a `-` marker and a digit control character are also valid
+  Danish CPR numbers, resolving to a different birth date. See the Finland
+  section above.
+- **A lowercase Finnish code is `InvalidCharacter`.** The allow table carries
+  Finland's letters in uppercase only and there is no case folding.
+- **`recognizedCountry()` is quieter than its name suggests.** It names a
+  country only where that country's own scheme genuinely accepts the value, so a
+  Finnish-shaped code with a wrong control character, or an eleven-digit string
+  failing Norway's modulus-11, gets no hint at all — see
+  [`recognizedCountry`](#recognizedcountry-a-hint-never-a-guarantee).
 - **A partial birth date yields no birth date and no age**, while remaining a
   fully valid identity number with a complete canonical form. If your consumer
   requires a birth date, check for `null` rather than assuming a successful parse

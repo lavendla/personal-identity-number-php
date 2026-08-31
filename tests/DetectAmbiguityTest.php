@@ -32,8 +32,27 @@ final class DetectAmbiguityTest extends TestCase
 {
     private const string AMBIGUOUS = '2601012384';
 
-    /** Fails Norway's modulus-11 check, so it has no bearer — see spec/fixtures/foreign/PROVENANCE.md. */
-    private const string NORWEGIAN = '13108633528';
+    /**
+     * DVV's own published example with its control character deliberately
+     * swapped, so it fails Finland's modulus-31 check and has no bearer — see
+     * spec/fixtures/foreign/PROVENANCE.md.
+     */
+    private const string UNPARSEABLE_EVERYWHERE = '131052-308U';
+
+    /**
+     * DVV's published test identity 010280-952L, valid under Finland's own
+     * scheme: individual number 952, inside the 900-999 block DVV states it
+     * does not issue from, so it identifies nobody — CLAUDE.md's Exception 3.
+     *
+     * It replaces the checksum-invalid code above in the recognition test
+     * below, because "recognized, but no candidate" is no longer a state any
+     * country can be in: every country is on the real-parse tier now, so a
+     * country that recognizes a value has also produced a number for it. What
+     * remains, and is what the test now asserts, is the recognition a *named*
+     * country's refusal carries — Sweden asked, Sweden refuses, Finland would
+     * have accepted.
+     */
+    private const string FINNISH = '010280-952L';
 
     #[Test]
     public function detectReturnsOneCandidatePerRegistryThatAccepts(): void
@@ -97,26 +116,37 @@ final class DetectAmbiguityTest extends TestCase
     }
 
     /**
-     * Decided here rather than left to fall out of the implementation, because it
-     * is new public behaviour: detect() reports every interpretation that
-     * produced a number, and a recognize-only scheme produces none. So a
-     * Norwegian value gives an empty list, and the recognition is available only
-     * through explain(). Anything else would mean inventing a
-     * PersonalIdentityNumber for a country whose numbers this package cannot
-     * canonicalise, validate or derive anything from.
+     * Decided here rather than left to fall out of the implementation, because
+     * it is public behaviour: detect() reports every interpretation that
+     * produced a number, and never a recognition. A value no registry accepts
+     * therefore gives an empty list rather than a list naming the country whose
+     * shape it matched — anything else would mean inventing a
+     * PersonalIdentityNumber for a value no registry would issue.
      */
     #[Test]
-    public function detectReportsNoCandidateForARecognizedForeignNumber(): void
-    {
-        $this->assertSame([], PersonalIdentityNumber::detect(self::NORWEGIAN, $this->options()));
-    }
-
-    #[Test]
-    public function explainStillReportsTheRecognitionDetectCannot(): void
+    public function detectReportsNoCandidateForAValueNoRegistryAccepts(): void
     {
         $this->assertSame(
-            Country::Norway,
-            PersonalIdentityNumber::explain(self::NORWEGIAN, null, $this->options())->recognizedCountry(),
+            [],
+            PersonalIdentityNumber::detect(self::UNPARSEABLE_EVERYWHERE, $this->options()),
+        );
+    }
+
+    /**
+     * The recognition explain() can give and detect() cannot. Asked as Swedish,
+     * so a country *is* named: Sweden refuses, and the hint says the value would
+     * have been accepted in Finland. With no country named, Finland is consulted
+     * for real and this same value parses, so there is no failure left to attach
+     * a hint to — which is why this test names a country and the one above does
+     * not.
+     */
+    #[Test]
+    public function explainReportsARecognitionDetectCannot(): void
+    {
+        $this->assertSame(
+            Country::Finland,
+            PersonalIdentityNumber::explain(self::FINNISH, Country::Sweden, $this->options())
+                ->recognizedCountry(),
         );
     }
 

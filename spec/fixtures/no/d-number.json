@@ -1,0 +1,106 @@
+[
+  {
+    "id": "no-d-number-keeps-both-offsets-in-its-canonical-form",
+    "input": "41836515143",
+    "issuedBy": "NO",
+    "referenceDate": "2026-08-16",
+    "options": {
+      "allowSyntheticNumbers": true
+    },
+    "outcome": "parsed",
+    "scheme": "no-d-number",
+    "canonical": "41836515143",
+    "birthDate": "1965-03-01",
+    "gender": "male",
+    "isPerson": true,
+    "formats": {
+      "canonical": "41836515143",
+      "display": "418365-15143",
+      "short": "418365-15143",
+      "masked": "4183651****"
+    },
+    "source": "unissuable",
+    "provenanceNote": "generated.csv's dnr-000-499 row, individual 151, day 1, month 3, year 1965: written as day 41 (01 + 40, Folkeregisterhåndboken § 2-2's D-number day offset) and month 83 (03 + 80, Skatteetaten's synthetic marker -- see spec/sources/norway-synthetic/README.md). canonical is the input unchanged: this is what the registry issued, and what an application indexes on, so both offsets stay in the canonical form rather than being decoded out. Only birthDate -- 1965-03-01 -- has both offsets removed, because that accessor's whole job is reporting the real calendar date."
+  },
+  {
+    "id": "no-d-number-day-boundary-at-seventy-one",
+    "input": "71879930051",
+    "issuedBy": "NO",
+    "referenceDate": "2026-08-16",
+    "options": {
+      "allowSyntheticNumbers": true
+    },
+    "outcome": "parsed",
+    "scheme": "no-d-number",
+    "canonical": "71879930051",
+    "birthDate": "1999-07-31",
+    "gender": "female",
+    "isPerson": true,
+    "source": "unissuable",
+    "provenanceNote": "generated.csv's dnr-000-499 row, individual 300, day 31: written as day 71 (31 + 40), the top of the D-number day range. Month 87 (07 + 80); see spec/sources/norway-synthetic/README.md. Individual 300 has an even last digit, reading female. Paired with the fixture above, whose day 41 is the range's bottom edge -- together they pin both ends of the +40 day-offset boundary."
+  },
+  {
+    "id": "no-d-number-individual-series-500-999-female",
+    "input": "55891067886",
+    "issuedBy": "NO",
+    "referenceDate": "2026-08-16",
+    "options": {
+      "allowSyntheticNumbers": true
+    },
+    "outcome": "parsed",
+    "scheme": "no-d-number",
+    "canonical": "55891067886",
+    "birthDate": "2010-09-15",
+    "gender": "female",
+    "isPerson": true,
+    "source": "unissuable",
+    "provenanceNote": "generated.csv's dnr-500-999 row, individual 678: Folkeregisterhåndboken § 2-2-2 assigns D-number individnummer 500-999 to any birth after 1 January 2000, with no year cap -- unlike fødselsnummer's equivalent row, which stops at year 39. Month 89 (09 + 80); see spec/sources/norway-synthetic/README.md. Individual 678 has an even last digit, reading female."
+  },
+  {
+    "id": "no-d-number-individual-series-500-999-male",
+    "input": "65912384300",
+    "issuedBy": "NO",
+    "referenceDate": "2026-08-16",
+    "options": {
+      "allowSyntheticNumbers": true
+    },
+    "outcome": "parsed",
+    "scheme": "no-d-number",
+    "canonical": "65912384300",
+    "birthDate": "2023-11-25",
+    "gender": "male",
+    "isPerson": true,
+    "source": "unissuable",
+    "provenanceNote": "generated.csv's dnr-500-999 row, individual 843: same series as the fixture above, individnummer's odd last digit reading male. Month 91 (11 + 80); see spec/sources/norway-synthetic/README.md."
+  },
+  {
+    "id": "no-d-number-and-national-identity-number-share-individual-and-year-but-not-century",
+    "input": "49867652301",
+    "issuedBy": "NO",
+    "referenceDate": "2090-01-01",
+    "options": {
+      "allowSyntheticNumbers": true
+    },
+    "outcome": "parsed",
+    "scheme": "no-d-number",
+    "canonical": "49867652301",
+    "birthDate": "2076-06-09",
+    "gender": "male",
+    "isPerson": true,
+    "source": "unissuable",
+    "provenanceNote": "The D-number side of the pair pinned by no-national-identity-number-and-d-number-share-individual-and-year-but-not-century, whose full argument lives there. generated.csv's dnr-500-999 row for individnummer 523: the same digits as the fødselsnummer fixture's fnr-749-500 row -- but written as a D-number, so Folkeregisterhåndboken § 2-2-2's table applies instead of § 2-2-1's, resolving to 2076 rather than 1876. referenceDate is 2090-01-01, not this file's usual 2026-08-16, because 2076-06-09 is otherwise a future birth date relative to it and this fixture would fail with FutureBirthDate before the century-table divergence it exists to pin was ever reached -- see no-d-number-resolves-to-a-future-birth-date below, which pins that failure directly on the same digits."
+  },
+  {
+    "id": "no-d-number-resolves-to-a-future-birth-date",
+    "input": "49867652301",
+    "issuedBy": "NO",
+    "referenceDate": "2026-08-16",
+    "options": {
+      "allowSyntheticNumbers": true
+    },
+    "outcome": "failed",
+    "failure": "future-birth-date",
+    "source": "unissuable",
+    "provenanceNote": "Same digits as no-d-number-and-national-identity-number-share-individual-and-year-but-not-century, at this file's usual referenceDate of 2026-08-16 instead of 2090-01-01. generated.csv's dnr-500-999 row for individnummer 523 resolves to 2076-06-09 under Folkeregisterhåndboken § 2-2-2's table (500-999, any year -> 2000s, with no year cap -- see d-number.json's centuryTable.description, which names FutureBirthDate as the mechanism that catches an uncapped far-future D-number year rather than a bound in the table itself). Against a 2026 reference date that is 50 years in the future, so the parse fails here instead of succeeding -- the failure the century-pair fixture had to move its referenceDate to 2090 specifically to avoid. Month 86 (06 + 80) and day 49 (09 + 40) are Skatteetaten's synthetic markers, same as every other fixture in this file -- see spec/sources/norway-synthetic/README.md."
+  }
+]

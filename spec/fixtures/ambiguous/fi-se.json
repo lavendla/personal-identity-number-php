@@ -1,0 +1,26 @@
+[
+  {
+    "id": "ambiguous-fi-se-an-intermediate-character-is-not-a-swedish-separator",
+    "input": "010280-952L",
+    "referenceDate": "2026-08-16",
+    "outcome": "parsed",
+    "scheme": "fi-personal-identity-code",
+    "detected": [
+      "fi-personal-identity-code"
+    ],
+    "birthDate": "1980-02-01",
+    "source": "dvv",
+    "provenanceNote": "Finland and Sweden do not collide. Sweden's shapes are all digits with an optional '-' or '+' separator and a four-digit tail; a Finnish code's control character may be a letter, and this one is. detect() reports exactly one scheme. The near-miss is closer than it looks -- both write six date digits, a hyphen and four characters -- which is why the pair is worth asserting rather than assuming. Published by DVV on Suomi.fi for Service Developers and vendored at spec/sources/dvv/test-identities.csv. Individual number 952, inside the 900-999 block DVV states it does not issue from, so the code is entered in no population register and identifies nobody. CLAUDE.md's Exception 3."
+  },
+  {
+    "id": "ambiguous-fi-se-stripping-the-marker-makes-it-nothing-at-all",
+    "input": "010280952L",
+    "referenceDate": "2026-08-16",
+    "outcome": "failed",
+    "failure": "not-an-identity-number",
+    "recognizedCountry": null,
+    "detected": [],
+    "source": "constructed",
+    "provenanceNote": "The same DVV code with its intermediate character removed, which is what a caller 'normalising' a Finnish number by stripping separators would produce. It is not a Swedish number -- ten characters, but the last is a letter -- and it is no longer a Finnish one either, because decree 690/2022 makes the marker part of the identity rather than punctuation. detect() reports nothing at all. Constructed and invalid, so it needs no provenance exception: ten characters ending in a letter can have no bearer in any registry here. This is the fixture that would go red if anyone taught the normalizer to drop a Finnish marker the way it drops a Swedish one."
+  }
+]

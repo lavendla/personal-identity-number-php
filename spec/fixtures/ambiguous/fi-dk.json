@@ -1,0 +1,38 @@
+[
+  {
+    "id": "ambiguous-fi-dk-a-value-valid-under-both-danish-and-finnish-rules-detects-as-two",
+    "input": "010490-9989",
+    "referenceDate": "2026-08-16",
+    "outcome": "ambiguous",
+    "detected": [
+      "dk-cpr-number",
+      "fi-personal-identity-code"
+    ],
+    "source": "medcom",
+    "provenanceNote": "The one real collision this promotion creates, and the headline of spec 1.0.0. Before Finland parsed, these eleven characters were Danish and nothing else: a parse outranked the recognition, so detect() returned one candidate. It now returns two, with different birth dates -- Denmark reads serial 9989 through its century table, Finland reads the '-' marker as the 1900s. A caller who was relying on detect() returning a single candidate for a Danish display form will see two. A published MedCom test number. MedCom's Danish numbers are assigned last rather than permanently withheld -- the guarantee is deferral, not impossibility; see spec/sources/medcom/README.md. It is also a valid Finnish code: 010490998 mod 31 = 9, and the individual number 998 sits inside the 900-999 block DVV states it does not issue from, so it identifies nobody in Finland either."
+  },
+  {
+    "id": "ambiguous-fi-dk-the-separator-is-what-makes-it-finnish-shaped",
+    "input": "0104909989",
+    "referenceDate": "2026-08-16",
+    "outcome": "parsed",
+    "scheme": "dk-cpr-number",
+    "detected": [
+      "dk-cpr-number"
+    ],
+    "source": "medcom",
+    "provenanceNote": "The same MedCom number in its unhyphenated form, which is Danish and only Danish: Finland's shape requires a non-digit at position seven and ten bare digits have none. Paired with the fixture above so the corpus pins where the collision actually comes from -- the separator, not the digits. Without this fixture, someone reading the ambiguity above could reasonably conclude that every Danish number is now also Finnish. A published MedCom test number. MedCom's Danish numbers are assigned last rather than permanently withheld -- the guarantee is deferral, not impossibility; see spec/sources/medcom/README.md. It is also a valid Finnish code: 010490998 mod 31 = 9, and the individual number 998 sits inside the 900-999 block DVV states it does not issue from, so it identifies nobody in Finland either."
+  },
+  {
+    "id": "fi-personal-identity-code-loses-to-a-real-danish-parse",
+    "input": "010490-9989",
+    "issuedBy": "DK",
+    "referenceDate": "2026-08-16",
+    "outcome": "parsed",
+    "scheme": "dk-cpr-number",
+    "canonical": "0104909989",
+    "recognizedCountry": null,
+    "source": "medcom",
+    "provenanceNote": "A published MedCom test number in its display form, which is character-for-character a shape-valid Finnish code: six digits, a hyphen, three digits, a digit control character. It parses as Danish, and this fixture pins that a parse outranks a recognition — without it, nothing stops a later change reclassifying valid Danish numbers as unrecognized foreign ones. The collision is structural rather than coincidental, because modulus-11 is not a Danish validity rule, so most such Finnish codes parse as Danish."
+  }
+]

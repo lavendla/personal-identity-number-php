@@ -92,7 +92,7 @@
       "masked": "19150072****"
     },
     "source": "skatteverket",
-    "provenanceNote": "Was se-coordination-number-unknown-day-is-rejected's sibling se-coordination-number-unknown-month-is-rejected, in coordination-number.json, asserting impossible-date. Reversed and renamed under spec 0.3.0: a fixture called …-is-rejected that asserts a successful parse is worse than no name at all. Skatteverket's own test corpus treats month 00 as a valid coordination number encoding an unknown birth month -- 130 of the 1498 rows in spec/sources/skatteverket/testsamordningsnummer-1914-2019.csv, re-counted against the committed corpus for Task 11. The gender survives because the birth number is intact, and the canonical form is complete, which is the whole argument for accepting these at all."
+    "provenanceNote": "Was se-coordination-number-unknown-day-is-rejected's sibling se-coordination-number-unknown-month-is-rejected, in coordination-number.json, asserting impossible-date. Reversed and renamed under spec 0.3.0: a fixture called …-is-rejected that asserts a successful parse is worse than no name at all. Skatteverket's own test corpus treats month 00 as a valid coordination number encoding an unknown birth month -- 130 of the 1498 rows in spec/sources/skatteverket/testsamordningsnummer-1914-2019.csv, re-counted directly against the committed corpus rather than assumed. The gender survives because the birth number is intact, and the canonical form is complete, which is the whole argument for accepting these at all."
   },
   {
     "id": "se-coordination-number-unknown-day-parses",

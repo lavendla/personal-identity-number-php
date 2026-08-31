@@ -88,8 +88,9 @@
     "options": { "allowOrganizationNumber": false },
     "outcome": "failed",
     "failure": "scheme-not-allowed",
+    "recognizedCountry": null,
     "source": "public-organization",
-    "provenanceNote": "Skatteverket's own organization number, third digit 2, under options that exclude organization numbers. The failure must be scheme-not-allowed rather than not-an-identity-number: the caller's own option is the reason, and reporting 'unrecognised' would hide that. This is why the scheme runs even when the option is false -- a scheme the dispatcher skipped could not report why it refused."
+    "provenanceNote": "Skatteverket's own organization number, third digit 2, under options that exclude organization numbers. The failure must be scheme-not-allowed rather than not-an-identity-number: the caller's own option is the reason, and reporting 'unrecognised' would hide that. This is why the scheme runs even when the option is false -- a scheme the dispatcher skipped could not report why it refused. Also pins the request-level suppression: six digits, a hyphen and four digits is shape-valid for both Denmark and Finland, and Denmark's own scheme refuses this exact value -- read as a CPR number its month is 21, which exists in no year -- so without suppressing recognizedCountry for SchemeNotAllowed this fixture would report FI, not Denmark. Either way it would be a wrong answer, since the value is a genuine Swedish organization number and the only problem is the caller's own option. allowOrganizationNumber: true on this exact input parses."
   },
   {
     "id": "se-organization-number-sole-proprietorship-resolves-as-a-person",

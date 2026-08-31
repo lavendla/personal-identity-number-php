@@ -1,0 +1,33 @@
+[
+  {
+    "id": "ambiguous-fi-no-a-finnish-code-is-not-eleven-digits",
+    "input": "010280-952L",
+    "referenceDate": "2026-08-16",
+    "options": {
+      "allowSyntheticNumbers": true
+    },
+    "outcome": "parsed",
+    "scheme": "fi-personal-identity-code",
+    "detected": [
+      "fi-personal-identity-code"
+    ],
+    "source": "dvv",
+    "provenanceNote": "Finland and Norway do not collide, and this is the pair where the near-miss is purely a matter of what counts as a character. Both are eleven characters long. Norway's are eleven *digits*; a Finnish code's seventh is always a non-digit marker and its eleventh may be a letter. So no string satisfies both, and detect() reports exactly one scheme. allowSyntheticNumbers is opted in deliberately even though this value is Finnish: it proves the absence holds under the most permissive options a caller can pass, rather than only under the defaults that would refuse every constructible Norwegian value anyway. Published by DVV on Suomi.fi for Service Developers and vendored at spec/sources/dvv/test-identities.csv. Individual number 952, inside the 900-999 block DVV states it does not issue from, so the code is entered in no population register and identifies nobody. CLAUDE.md's Exception 3."
+  },
+  {
+    "id": "ambiguous-fi-no-eleven-digits-are-norwegian-and-not-finnish",
+    "input": "18918825033",
+    "referenceDate": "2026-08-16",
+    "options": {
+      "allowSyntheticNumbers": true
+    },
+    "outcome": "parsed",
+    "scheme": "no-national-identity-number",
+    "detected": [
+      "no-national-identity-number"
+    ],
+    "birthDate": "1988-11-18",
+    "source": "unissuable",
+    "provenanceNote": "The other direction of the same pair, which is why both are here: an all-digit eleven-character value is Norwegian and cannot be Finnish, because position seven must be a marker. Month 91 (11 + 80) is Skatteetaten's synthetic-test convention -- not a calendar month, so no bearer can exist. generated.csv's fnr-499-000 row, individual 250. CLAUDE.md's Exception 1."
+  }
+]

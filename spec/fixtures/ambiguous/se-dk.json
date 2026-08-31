@@ -4,16 +4,18 @@
     "input": "2601012384",
     "referenceDate": "2026-08-16",
     "outcome": "ambiguous",
+    "detected": ["dk-cpr-number", "se-personal-number"],
     "source": "skatteverket",
-    "provenanceNote": "Carries no issuedBy, which is what makes it an ambiguity case: the harness names no country, so every scheme runs. The ten-digit short form of Skatteverket's published 202601012384. Read as Swedish it is born 2026-01-01 and Luhn-valid; read as Danish it is born 1901-01-26, because DDMMYY puts the day first and serial 2384 resolves to the 1900s. Both readings are entirely valid and they are 125 years apart. Denmark has no checksum to break the tie, so nothing inside this package can choose -- which is why parse() requires a country and detect() reports every interpretation. 5502 Skatteverket short forms collide this way; this is one of them, not a curiosity. The referenceDate is load-bearing: without one Sweden refuses to guess a century and fails with CenturyRequired, leaving Denmark the only reading and nothing to be ambiguous about. The collision needs a reference date to exist at all."
+    "provenanceNote": "Carries no issuedBy, which is what makes it an ambiguity case: the harness names no country, so every scheme runs. The ten-digit short form of Skatteverket's published 202601012384. Read as Swedish it is born 2026-01-01 and Luhn-valid; read as Danish it is born 1901-01-26, because DDMMYY puts the day first and serial 2384 resolves to the 1900s. Both readings are entirely valid and they are 125 years apart. Denmark has no checksum to break the tie, so nothing inside this package can choose -- which is why parse() requires a country and detect() reports every interpretation. 5502 Skatteverket short forms collide this way; this is one of them, not a curiosity. The referenceDate is load-bearing: without one Sweden refuses to guess a century and fails with CenturyRequired, leaving Denmark the only reading and nothing to be ambiguous about. The collision needs a reference date to exist at all. `detected` names both schemes explicitly. It was absent until spec 1.0.0, when schemes:check learned to check that a pair's evidence actually concerns that pair -- an `outcome: \"ambiguous\"` on its own proves a collision exists somewhere, not that it is this pair's."
   },
   {
     "id": "ambiguous-se-dk-medcom-number-also-parses-as-swedish",
     "input": "0504909995",
     "referenceDate": "2026-08-16",
     "outcome": "ambiguous",
+    "detected": ["dk-cpr-number", "se-coordination-number"],
     "source": "medcom",
-    "provenanceNote": "The collision from the Danish side. A MedCom reserved serial, born 1990-04-05 as Danish, and simultaneously a Luhn-valid Swedish coordination number -- day 90 is 30 plus the 60 offset -- born 2005-04-30. Five of MedCom's 36 published numbers collide this way. This fixture can only exist because the provenance gate now reads the MedCom corpus; before that it was reported as an unexplained Swedish-looking number."
+    "provenanceNote": "The collision from the Danish side. A MedCom reserved serial, born 1990-04-05 as Danish, and simultaneously a Luhn-valid Swedish coordination number -- day 90 is 30 plus the 60 offset -- born 2005-04-30. Five of MedCom's 36 published numbers collide this way. This fixture can only exist because the provenance gate now reads the MedCom corpus; before that it was reported as an unexplained Swedish-looking number. `detected` names both schemes explicitly. It was absent until spec 1.0.0, when schemes:check learned to check that a pair's evidence actually concerns that pair -- an `outcome: \"ambiguous\"` on its own proves a collision exists somewhere, not that it is this pair's."
   },
   {
     "id": "ambiguous-se-dk-naming-a-country-resolves-it",

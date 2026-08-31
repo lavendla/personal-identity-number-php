@@ -66,7 +66,9 @@
     "referenceDate": null,
     "outcome": "failed",
     "failure": "century-required",
-    "source": "skatteverket"
+    "recognizedCountry": null,
+    "source": "skatteverket",
+    "provenanceNote": "Skatteverket's own 19031204-9802 with the century elided and no reference date to recover it. Six digits, a hyphen and four digits is shape-valid for both Denmark and Finland, and Denmark's own scheme genuinely accepts this exact value under permissive options, so without the request-level suppression recognizedCountry would report DK here -- a wrong answer, since this is a genuine Swedish number that fails only because the request omitted a reference date. Pins that CenturyRequired suppresses the hint: give this exact input a reference date and it parses as Swedish, so the country was never in question."
   },
   {
     "id": "se-century-boundary-short-format-requires-reference-date",

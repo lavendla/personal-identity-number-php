@@ -4,11 +4,8 @@ declare(strict_types=1);
 
 namespace Lavendla\PersonalIdentityNumber\Tests\Conformance;
 
-use DateTimeImmutable;
-use DateTimeZone;
 use Lavendla\PersonalIdentityNumber\Enums\Country;
 use Lavendla\PersonalIdentityNumber\Enums\Format;
-use Lavendla\PersonalIdentityNumber\ParseOptions;
 use Lavendla\PersonalIdentityNumber\ParseOutcome;
 use Lavendla\PersonalIdentityNumber\PersonalIdentityNumber;
 use PHPUnit\Framework\Attributes\DataProvider;
@@ -181,6 +178,43 @@ final class ConformanceTest extends TestCase
         $this->assertSame($case['isPerson'], $this->explain($case)->number()?->isPerson());
     }
 
+    /**
+     * Sorted both sides, because "which registries accept this" is a set and the
+     * order candidates come back in is scheme-registration order -- an
+     * implementation detail no fixture should be pinning by accident.
+     *
+     * Always calls detect(), which names no country, regardless of whether the
+     * fixture carries an issuedBy: detect()'s whole question is what the value
+     * is when nobody says.
+     *
+     * @param array<string, mixed> $case
+     */
+    #[Test]
+    #[DataProvider('cases')]
+    public function detectedSchemesMatch(array $case): void
+    {
+        if (! array_key_exists('detected', $case)) {
+            $this->expectNotToPerformAssertions();
+
+            return;
+        }
+
+        /** @var list<string> $expected */
+        $expected = $case['detected'];
+        sort($expected);
+
+        $schemes = array_map(
+            static fn(PersonalIdentityNumber $candidate): string => $candidate->scheme()->value,
+            PersonalIdentityNumber::detect(
+                FixtureLoader::stringField($case, 'input'),
+                FixtureLoader::parseOptions($case),
+            ),
+        );
+        sort($schemes);
+
+        $this->assertSame($expected, $schemes);
+    }
+
     /** @param array<string, mixed> $case */
     private function explain(array $case): ParseOutcome
     {
@@ -192,35 +226,7 @@ final class ConformanceTest extends TestCase
         return PersonalIdentityNumber::explain(
             FixtureLoader::stringField($case, 'input'),
             $issuedBy === null ? null : Country::from($issuedBy),
-            $this->parseOptions($case),
-        );
-    }
-
-    /** @param array<string, mixed> $case */
-    private function parseOptions(array $case): ParseOptions
-    {
-        $referenceDate = FixtureLoader::optionalStringField($case, 'referenceDate');
-
-        /** @var array<string, bool> $flags */
-        $flags = $case['options'] ?? [];
-
-        $allowCoordinationNumber = $flags['allowCoordinationNumber'] ?? true;
-        $allowOrganizationNumber = $flags['allowOrganizationNumber'] ?? true;
-        $allowUnknownBirthNumber = $flags['allowUnknownBirthNumber'] ?? true;
-
-        if ($referenceDate === null) {
-            return ParseOptions::forCenturyCompleteInput(
-                $allowCoordinationNumber,
-                $allowOrganizationNumber,
-                $allowUnknownBirthNumber,
-            );
-        }
-
-        return new ParseOptions(
-            new DateTimeImmutable($referenceDate, new DateTimeZone('UTC')),
-            $allowCoordinationNumber,
-            $allowOrganizationNumber,
-            $allowUnknownBirthNumber,
+            FixtureLoader::parseOptions($case),
         );
     }
 }

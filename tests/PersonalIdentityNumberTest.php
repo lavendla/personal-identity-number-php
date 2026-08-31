@@ -20,6 +20,17 @@ final class PersonalIdentityNumberTest extends TestCase
 {
     private const string VALID = '190312049802';
 
+    /**
+     * Individual 101, fnr-499-000 series, from
+     * spec/sources/norway-synthetic/generated.csv -- the written month is 84,
+     * which decodes to April under the Tenor +80 convention. Same value
+     * NorwegianNationalIdentityNumberSchemeTest calls SYNTHETIC_MALE.
+     */
+    private const string SYNTHETIC_NORWEGIAN = '05847510147';
+
+    /** MedCom reserved serial, resolving to 1948-12-25. */
+    private const string MEDCOM_DANISH = '251248-9996';
+
     #[Test]
     public function itDerivesTheBirthDate(): void
     {
@@ -231,6 +242,32 @@ final class PersonalIdentityNumberTest extends TestCase
         $second = PersonalIdentityNumber::parse('20190101-2391', Country::Sweden, $options);
 
         $this->assertFalse($first->equals($second));
+    }
+
+    #[Test]
+    public function reportsWhetherAParsedNumberCameFromATestRange(): void
+    {
+        $number = PersonalIdentityNumber::parse(
+            self::SYNTHETIC_NORWEGIAN,
+            Country::Norway,
+            new ParseOptions(null, allowSyntheticNumbers: true),
+        );
+
+        $this->assertTrue($number->isSynthetic());
+    }
+
+    #[Test]
+    public function isFalseForANumberFromARealRegistry(): void
+    {
+        $number = PersonalIdentityNumber::parse(self::MEDCOM_DANISH, Country::Denmark, new ParseOptions(null));
+
+        $this->assertFalse($number->isSynthetic());
+    }
+
+    #[Test]
+    public function isFalseForASwedishNumberSoTheFieldIsNotAccidentallyNorwayShaped(): void
+    {
+        $this->assertFalse($this->parse()->isSynthetic());
     }
 
     private function parse(): PersonalIdentityNumber

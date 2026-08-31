@@ -1,17 +1,40 @@
-# Provenance — recognize-only foreign fixtures
+# Provenance — cross-country foreign fixtures
 
-Norway and Finland are **recognized, not supported**: a value that matches their
-shape resolves to `ParseFailure::UnsupportedScheme` with
-`ParseOutcome::recognizedCountry()` set, and no number is ever produced. Every
-fixture here therefore asserts a failure, which changes what provenance has to
-prove but does not remove the obligation.
+**Every fixture here asserts a failure, and there are two routes to having no
+bearer.** Nine are `constructed` to fail their own country's national checksum.
+Two are `unissuable` — checksum-**valid** Norwegian synthetic values carrying
+Skatteetaten's `+80` month marker, which no bearer can hold either. Read a
+fixture's `source` before assuming which it is.
+
+**What they no longer demonstrate.** These began as the recognize-only corpus:
+while Norway and Finland were recognized-by-shape-and-refused-by-name, a value
+here resolved to `UnsupportedScheme` with `recognizedCountry()` naming the
+country, and shape was the only question the package could ask. Both schemes are
+real as of spec `1.0.0`, and a checksum-invalid value is exactly what a real
+scheme rejects — so these values are no longer recognized as anything, and the
+fixtures now assert `not-an-identity-number` with `recognizedCountry()` null.
+
+Their ids still say `is-recognized`. A fixture id is never edited, so the names
+record what they were written to pin rather than what they pin now — which is the
+narrower and still useful claim that **a value no registry would accept gets the
+fallback failure and no hint**, whichever country was asked.
+
+The recognition they used to demonstrate is pinned instead by fixtures using
+values a registry genuinely accepts: `fi-…-is-recognized-when-asked-as-swedish`
+in `spec/fixtures/fi/`, and the synthetic Norwegian pair at the bottom of this
+file. A recognition now requires a valid number, which is the whole change.
+
+See `spec/fixtures/no/PROVENANCE.md` and `spec/fixtures/fi/PROVENANCE.md` for the
+sibling corpora built the opposite way — checksum-valid on purpose, so they
+resolve successfully.
 
 ## Why a constructed foreign number is permissible here
 
 `CLAUDE.md`'s rule is about **valid** numbers: a randomly generated valid
-personal identity number very likely belongs to a living person. A recognize-only
-fixture never needs to be valid — recognition is shape-matching, and this package
-implements neither country's checksum on purpose.
+personal identity number very likely belongs to a living person. A fixture here
+never needs to be valid, because what it pins is a refusal — so it only has to be
+invalid under a checksum that is implemented and real, which both countries' now
+are.
 
 So every constructed fixture here is built to **fail its own country's national
 checksum**. That is the substantive claim, and it is stronger than "we made it
@@ -36,14 +59,23 @@ answers can be trusted.
 | `fi-…-recognizes-a-marker-added-in-2023` | `150375Y246D` | Control character for `150375246` is `C` |
 | `fi-…-in-lowercase-is-an-invalid-character` | `131052-308u` | Same invalid code, lowercase |
 | `fi-…-is-recognized-when-nothing-parses-it` | `010490-998T` | Control character for `010490998` is `9` |
+| `no-…-synthetic-value-is-recognized-only-when-opted-in` | `05847510147` | **Valid**, `unissuable`: month 84 is not a calendar month |
+| `no-…-synthetic-value-is-not-recognized-on-default-options` | `05847510147` | Same digits, `allowSyntheticNumbers` left at its default |
 
-One fixture here is **not** constructed:
-`fi-personal-identity-code-loses-to-a-real-danish-parse` uses `010490-9989`,
-a published MedCom test number, marked `medcom`. It has to be a real, valid
-Danish number, because what it pins is that a parse outranks a recognition — a
-constructed invalid number could not demonstrate that.
+**Two fixtures here are not constructed**, and both are Norwegian synthetic
+values marked `unissuable` — the `no-…-synthetic-value-is-recognized-only-when-opted-in`
+pair. They must be checksum-**valid**, because what they pin is that a recognition
+happens at all and only when the caller opted in, which an invalid value cannot
+demonstrate. Their month of 84 is Skatteetaten's `+80` marker, so no bearer can
+exist regardless — `CLAUDE.md`'s Exception 1.
 
-## The collision that made that fixture necessary
+`fi-personal-identity-code-loses-to-a-real-danish-parse` used to be the
+not-constructed fixture in this file. It moved to
+`spec/fixtures/ambiguous/fi-dk.json` at spec `1.0.0`, where it belongs now that
+Denmark and Finland are a genuine ambiguity pair rather than a parse beating a
+recognition.
+
+## The collision, which is now a real ambiguity
 
 **A Finnish code whose intermediate character is `-` and whose control character
 happens to be a digit is character-for-character a Danish CPR number.** Not
@@ -52,12 +84,16 @@ occasionally: the Danish display form `DDMMYY-SSSS` and the Finnish
 modulus-11 is not a Danish validity rule, most such codes parse as valid Danish
 numbers.
 
-The package resolves this by ordering rather than by guessing: a candidate always
-outranks a recognition, so `010490-9989` stays Danish and the recognition is
-never consulted. `010490-998T` is the same six digits with a letter control
-character, which no Danish shape can match, and it is recognized as Finnish. The
-two fixtures exist as a pair because either alone would leave the boundary
-between them untested.
+**This stopped being an ordering question at spec `1.0.0`.** While Finland was
+recognize-only a candidate simply outranked a recognition, so `010490-9989` was
+Danish and the recognition was never consulted. Finland's scheme is real now, so
+that value is valid under **both** registries and `detect()` returns two
+candidates with different birth dates. The caller must name a country.
+
+`010490-998T` — the same six digits with a letter control character — matches no
+Danish shape, and is invalid in Finland too, so it is refused outright with no
+hint. Where the pair used to mark the boundary between a parse and a recognition,
+the ambiguity itself is now pinned by `spec/fixtures/ambiguous/fi-dk.json`.
 
 ## Why the Swedish provenance gate is silent here
 

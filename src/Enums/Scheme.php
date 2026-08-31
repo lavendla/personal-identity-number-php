@@ -4,26 +4,27 @@ declare(strict_types=1);
 
 namespace Lavendla\PersonalIdentityNumber\Enums;
 
+use Lavendla\PersonalIdentityNumber\Generated\SpecData;
+use OutOfRangeException;
+
 enum Scheme: string
 {
     case SePersonalNumber = 'se-personal-number';
     case SeCoordinationNumber = 'se-coordination-number';
     case SeOrganizationNumber = 'se-organization-number';
     case DkCprNumber = 'dk-cpr-number';
+    case NoNationalIdentityNumber = 'no-national-identity-number';
+    case NoDNumber = 'no-d-number';
+    case FiPersonalIdentityCode = 'fi-personal-identity-code';
 
     public function country(): Country
     {
-        return match ($this) {
-            self::SePersonalNumber,
-            self::SeCoordinationNumber,
-            self::SeOrganizationNumber => Country::Sweden,
-            self::DkCprNumber          => Country::Denmark,
-        };
+        return Country::from($this->metadata()['country']);
     }
 
     public function isPerson(): bool
     {
-        return $this !== self::SeOrganizationNumber;
+        return $this->metadata()['isPerson'];
     }
 
     /**
@@ -37,22 +38,26 @@ enum Scheme: string
      */
     public function displayElision(): int
     {
-        return $this === self::SeOrganizationNumber ? 2 : 0;
+        return $this->metadata()['displayElision'];
     }
 
     /**
-     * Where Format::Display inserts its separator, counted after any elision.
+     * Where Format::Display inserts its separator, counted after any elision,
+     * or null when the canonical form already carries one.
      *
      * Sweden's personal and coordination numbers write CCYYMMDD and split after
      * eight. Denmark writes DDMMYY and splits after six. An organization number
      * splits after six too, having already dropped its prefix.
+     *
+     * Null only for Finland, and it is a real answer rather than a missing one:
+     * a Finnish code's intermediate character sits at exactly the position a
+     * separator would be inserted at, and decree 690/2022 makes it part of the
+     * identity, so there is nothing to insert. See
+     * spec/schemes/fi/personal-identity-code.json's displaySplitNote.
      */
-    public function displaySplit(): int
+    public function displaySplit(): ?int
     {
-        return match ($this) {
-            self::SePersonalNumber, self::SeCoordinationNumber => 8,
-            self::SeOrganizationNumber, self::DkCprNumber      => 6,
-        };
+        return $this->metadata()['displaySplit'];
     }
 
     /**
@@ -67,9 +72,36 @@ enum Scheme: string
      * for organization numbers because their `16` occupies the same two
      * positions, and made Format::Short throw ReferenceDateRequired for a value
      * that has no age to report.
+     *
+     * Norway and Finland are false for the same reason as Denmark, by a
+     * different route: Norway's century lives in the individnummer rather than a
+     * separate marker, and Finland's century marker is load-bearing under decree
+     * 690/2022, so neither is ever elided from any written form.
      */
     public function shortFormElidesCentury(): bool
     {
-        return $this === self::SePersonalNumber || $this === self::SeCoordinationNumber;
+        return $this->metadata()['shortFormElidesCentury'];
+    }
+
+    /**
+     * Every accessor above reads from here rather than matching on $this, so a
+     * scheme added to spec/schemes/ without a SCHEME_METADATA entry fails
+     * loudly here instead of a match expression silently missing an arm.
+     *
+     * @return array{
+     *     country: string,
+     *     displayElision: int,
+     *     displaySplit: int|null,
+     *     isPerson: bool,
+     *     shortFormElidesCentury: bool,
+     * }
+     */
+    private function metadata(): array
+    {
+        if (! array_key_exists($this->value, SpecData::SCHEME_METADATA)) {
+            throw new OutOfRangeException("no scheme metadata for {$this->value}");
+        }
+
+        return SpecData::SCHEME_METADATA[$this->value];
     }
 }

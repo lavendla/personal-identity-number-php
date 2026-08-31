@@ -69,10 +69,10 @@
     "issuedBy": "DK",
     "referenceDate": "2026-08-16",
     "outcome": "failed",
-    "failure": "unsupported-scheme",
+    "failure": "not-an-identity-number",
     "source": "constructed",
-    "provenanceNote": "Serials run 0001-9999, so DDMMYY-0000 is not a CPR number and no bearer can exist. It is rejected by the century table rather than by a separate range check: a serial of 0000 falls outside every row, so the lookup has nowhere to resolve it. The reported failure changed in spec 0.3.0 and Denmark's behaviour did not. Six digits, a hyphen and four digits is also a shape-valid Finnish personal identity code, so once Finland became recognize-only the most specific answer available stopped being 'no scheme recognised this shape' -- the precedence table ranks unsupported-scheme above not-an-identity-number precisely because a recognition is more informative than the fallback. Denmark's refusal is still pinned here by outcome: failed, which would go red if the century table ever accepted a serial of 0000. The unhyphenated companion fixture pins the original failure code with no foreign shape in play.",
-    "recognizedCountry": "FI"
+    "provenanceNote": "Serials run 0001-9999, so DDMMYY-0000 is not a CPR number and no bearer can exist. It is rejected by the century table rather than by a separate range check: a serial of 0000 falls outside every row, so the lookup has nowhere to resolve it. The reported failure has now changed twice while Denmark's behaviour never did, which is the whole reason this fixture pins Denmark's refusal by outcome: failed rather than by a failure code. In spec 0.3.0 it became unsupported-scheme with recognizedCountry FI: six digits, a hyphen and four digits is also a shape-valid Finnish code, and while Finland was recognize-only a shape match was the most this package could say. Finland's scheme is now real, and it refuses this value on the modulus-31 control character -- the alphabet indexes 6 for 251248000, not 0 -- so no country is recognized and the answer is the fallback again. Both changes are the recognition layer talking, never Denmark. The unhyphenated companion fixture pins the same refusal with no foreign shape in play at all.",
+    "recognizedCountry": null
   },
   {
     "id": "dk-cpr-number-rejects-the-thirtieth-of-february",
@@ -82,7 +82,8 @@
     "outcome": "failed",
     "failure": "impossible-date",
     "source": "constructed",
-    "provenanceNote": "30 February exists in no century, so no bearer can exist. The serial is 3001 rather than the 3000 a person would reach for first, because that form is Luhn-valid as a Swedish ten-digit short form and the provenance gate flags it. Writing the rejected value out here would trip the gate too, which is why it is described rather than quoted."
+    "provenanceNote": "30 February exists in no century, so no bearer can exist. The serial is 3001 rather than the 3000 a person would reach for first, because that form is Luhn-valid as a Swedish ten-digit short form and the provenance gate flags it. Writing the rejected value out here would trip the gate too, which is why it is described rather than quoted. recognizedCountry is asserted null here, and that assertion is new rather than unchanged: while Finland was recognize-only this value was reported as looking Finnish on shape alone, and spec/golden.json recorded that where no fixture field did. Finland's scheme is real now and refuses this value as Denmark does, so the hint is gone -- written down here so a test rather than only the snapshot is what notices if it returns.",
+    "recognizedCountry": null
   },
   {
     "id": "dk-cpr-number-rejects-a-birth-date-after-the-reference-date",
@@ -92,7 +93,8 @@
     "outcome": "failed",
     "failure": "future-birth-date",
     "source": "constructed",
-    "provenanceNote": "Serial 5000 with year 32 resolves to 2032, after the reference date. Safe to construct precisely because no bearer can exist yet: CPR has not issued numbers to people not yet born."
+    "provenanceNote": "Serial 5000 with year 32 resolves to 2032, after the reference date. Safe to construct precisely because no bearer can exist yet: CPR has not issued numbers to people not yet born. recognizedCountry is asserted null here, and that assertion is new rather than unchanged: while Finland was recognize-only this value was reported as looking Finnish on shape alone, and spec/golden.json recorded that where no fixture field did. Finland's scheme is real now and refuses this value as Denmark does, so the hint is gone -- written down here so a test rather than only the snapshot is what notices if it returns.",
+    "recognizedCountry": null
   },
   {
     "id": "dk-cpr-number-rejects-a-serial-of-zero-without-a-separator",

@@ -12,10 +12,8 @@ use Lavendla\PersonalIdentityNumber\Enums\Gender;
 use Lavendla\PersonalIdentityNumber\Enums\ParseFailure;
 use Lavendla\PersonalIdentityNumber\Enums\Scheme;
 use Lavendla\PersonalIdentityNumber\Exceptions\ParseException;
-use Lavendla\PersonalIdentityNumber\Schemes\DanishCprNumberScheme;
-use Lavendla\PersonalIdentityNumber\Schemes\RecognizeOnlyScheme;
-use Lavendla\PersonalIdentityNumber\Schemes\SwedishOrganizationNumberScheme;
-use Lavendla\PersonalIdentityNumber\Schemes\SwedishPersonalNumberScheme;
+use Lavendla\PersonalIdentityNumber\Generated\SpecData;
+use Lavendla\PersonalIdentityNumber\Schemes\CountryRecognizer;
 use SensitiveParameter;
 
 final readonly class PersonalIdentityNumber
@@ -26,6 +24,7 @@ final readonly class PersonalIdentityNumber
         private ?BirthTime $birth,
         private ?Gender $genderValue,
         private ?DateTimeImmutable $referenceDate,
+        private bool $synthetic,
     ) {}
 
     public static function parse(
@@ -84,7 +83,8 @@ final readonly class PersonalIdentityNumber
     }
 
     /**
-     * The registry. A country joins by appearing here and in resultsFor().
+     * The registry. A country joins by appearing here and in
+     * SupportedSchemes::resultsFor().
      *
      * A named country narrows this to that country alone; a null country runs
      * every scheme, which is what lets detect() report a value valid under more
@@ -94,41 +94,11 @@ final readonly class PersonalIdentityNumber
      */
     private static function countriesToTry(?Country $issuedBy): array
     {
-        $supported = [Country::Sweden, Country::Denmark];
-
         if ($issuedBy === null) {
-            return $supported;
+            return SupportedSchemes::SUPPORTED_COUNTRIES;
         }
 
-        return in_array($issuedBy, $supported, true) ? [$issuedBy] : [];
-    }
-
-    /**
-     * Every scheme a country has, each returning its own result. Sweden has two,
-     * so a Swedish value is offered to both — and the organization scheme has to
-     * run even when the caller excluded organization numbers, because reporting
-     * SchemeNotAllowed requires recognising the number first.
-     *
-     * @return non-empty-list<SchemeResult|ParseFailure>
-     */
-    private static function resultsFor(
-        Country $country,
-        string $normalized,
-        ParseOptions $options,
-    ): array {
-        return match ($country) {
-            Country::Sweden => [
-                SwedishPersonalNumberScheme::parse(
-                    $normalized,
-                    $options->referenceDate,
-                    $options->allowCoordinationNumber,
-                    $options->allowUnknownBirthNumber,
-                ),
-                SwedishOrganizationNumberScheme::parse($normalized, $options->allowOrganizationNumber),
-            ],
-            Country::Denmark                  => [DanishCprNumberScheme::parse($normalized, $options->referenceDate)],
-            Country::Norway, Country::Finland => [ParseFailure::CountryNotSupported],
-        };
+        return in_array($issuedBy, SupportedSchemes::SUPPORTED_COUNTRIES, true) ? [$issuedBy] : [];
     }
 
     /**
@@ -159,6 +129,11 @@ final readonly class PersonalIdentityNumber
         'impossible-date'         => 3,
         'future-birth-date'       => 3,
         'implausible-birth-date'  => 3,
+        // Norway's checksum is computed after the +80 offset is added, so a
+        // synthetic number passes modulus-11 like any other -- this is a refusal
+        // about the decoded month, ranked with the other checksum-passing,
+        // date-derived refusals rather than above or below them.
+        'synthetic-number'        => 3,
         'century-required'        => 4,
         'reference-date-required' => 4,
         'country-not-supported'   => 4,
@@ -197,7 +172,7 @@ final readonly class PersonalIdentityNumber
         $failures = [];
 
         foreach ($countries as $country) {
-            foreach (self::resultsFor($country, $normalized, $options) as $parsed) {
+            foreach (SupportedSchemes::resultsFor($country, $normalized, $options) as $parsed) {
                 if ($parsed instanceof ParseFailure) {
                     $failures[] = $parsed;
 
@@ -210,6 +185,7 @@ final readonly class PersonalIdentityNumber
                     $parsed->birthTime,
                     $parsed->gender,
                     $options->referenceDate,
+                    $parsed->synthetic,
                 );
             }
         }
@@ -219,7 +195,7 @@ final readonly class PersonalIdentityNumber
         }
 
         // Consulted only once every real scheme has refused, because a
-        // recognition is not a candidate: a recognize-only scheme produces no
+        // recognition is not a candidate: CountryRecognizer produces no
         // number, so detect() cannot report one and succeeded() stays false.
         //
         // That ordering is also the answer to the Denmark/Finland collision. A
@@ -227,7 +203,26 @@ final readonly class PersonalIdentityNumber
         // character-for-character a Danish CPR number, and most such codes parse
         // as valid Danish ones — so a parse outranking a recognition is what
         // keeps `131052-3085` Danish rather than reclassifying it as foreign.
-        $recognized = RecognizeOnlyScheme::recognize($normalized);
+        //
+        // Excludes every country already consulted, not only a single named
+        // one: with no country named, $countries is every supported country,
+        // and without this a value that fails both Swedish schemes would be
+        // reported as looking Swedish — the exact "it refused it and it looks
+        // like itself" noise this exists to prevent.
+        //
+        // The caller's referenceDate and allowSyntheticNumbers travel
+        // through unchanged, because the question a hint answers is "does
+        // this date exist" and "would this caller accept a value built under
+        // the registry's own test-data convention", not "does it exist
+        // relative to options nobody asked about". The other allow* flags do
+        // not travel: CountryRecognizer::recognize() asks its own permissive
+        // question for a supported country. See CountryRecognizer.
+        $recognized = CountryRecognizer::recognize(
+            $normalized,
+            $countries,
+            $options->referenceDate,
+            $options->allowSyntheticNumbers,
+        );
 
         if ($recognized !== null) {
             $failures[] = ParseFailure::UnsupportedScheme;
@@ -258,15 +253,31 @@ final readonly class PersonalIdentityNumber
 
         $failure = self::mostSpecificFailure($failures);
 
-        // The recognized country rides along only with UnsupportedScheme, which
-        // is the contract both READMEs already document. A more specific refusal
-        // won because the caller named a country and that country had a real
-        // objection; attaching a foreign country to it would report two answers
-        // to one question.
+        // Attached regardless of which failure won, with one exception below.
+        // A named country's own scheme can refuse for a reason more specific
+        // than UnsupportedScheme — Sweden saying ChecksumMismatch to a value
+        // Denmark's own scheme genuinely parses — and the hint is exactly as
+        // informative attached to that refusal as it would be attached to
+        // UnsupportedScheme. Withholding it there would report less than the
+        // package actually knows.
+        //
+        // Suppressed for a request-level failure. CenturyRequired and
+        // SchemeNotAllowed mean the asked country's own scheme would have
+        // parsed the value given different options (a reference date, an
+        // allow* flag), so recognizedCountry() would tell the caller they
+        // may have named the wrong country when the actual problem is the
+        // request — pointing them at the wrong fix while they are holding a
+        // perfectly good number. See spec/error-codes.json's
+        // requestLevelFailuresNote.
         return ParseOutcome::failed(
             $failure,
-            $failure === ParseFailure::UnsupportedScheme ? $recognized : null,
+            self::isRequestLevelFailure($failure) ? null : $recognized,
         );
+    }
+
+    private static function isRequestLevelFailure(ParseFailure $failure): bool
+    {
+        return in_array($failure->value, SpecData::REQUEST_LEVEL_FAILURES, true);
     }
 
     /**
@@ -350,6 +361,17 @@ final readonly class PersonalIdentityNumber
     }
 
     /**
+     * True only for a value accepted under Skatteetaten/Digdir's `+80`
+     * test-data convention with `allowSyntheticNumbers` set. See the comment
+     * on SchemeResult::$synthetic for why every other scheme reports false
+     * explicitly rather than by default.
+     */
+    public function isSynthetic(): bool
+    {
+        return $this->synthetic;
+    }
+
+    /**
      * Compares calendar dates, never instants. `DateTimeImmutable::diff()`
      * measures the exact interval between two timestamps, which would drift
      * by a day whenever the reference date and the (always-UTC) birth date
@@ -403,6 +425,15 @@ final readonly class PersonalIdentityNumber
     {
         $shown = substr($this->canonical, $this->scheme->displayElision());
         $split = $this->scheme->displaySplit();
+
+        // Finland. Its canonical form already carries its intermediate
+        // character at the position a separator would go, and that character is
+        // part of the identity under decree 690/2022 rather than punctuation --
+        // so the written form is the canonical form and there is nothing to
+        // insert.
+        if ($split === null) {
+            return $shown;
+        }
 
         return substr($shown, 0, $split) . '-' . substr($shown, $split);
     }

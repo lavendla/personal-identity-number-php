@@ -1,0 +1,17 @@
+[
+  {
+    "id": "ambiguous-dk-no-eleven-digits-cannot-be-a-ten-digit-cpr-number",
+    "input": "41836515143",
+    "referenceDate": "2026-08-16",
+    "options": {
+      "allowSyntheticNumbers": true
+    },
+    "outcome": "parsed",
+    "scheme": "no-d-number",
+    "detected": [
+      "no-d-number"
+    ],
+    "source": "unissuable",
+    "provenanceNote": "Norway and Denmark do not collide. Denmark's CPR number is ten digits, optionally hyphenated after six; Norway's D-number is eleven digits with no separator, and a length cannot be both. Deliberately a D-number rather than a fodselsnummer, so this pair is checked against the Norwegian scheme whose written day (41-71) is furthest from anything Denmark accepts -- Denmark would read a leading 41 as the forty-first of a month. detect() reports exactly one scheme, which is the assertion. Day 41 (01 + 40), Skatteetaten's D-number day offset, and month 83 (03 + 80), its synthetic-test marker. A written month of 81-92 is not a calendar month, so no bearer can exist -- CLAUDE.md's Exception 1. From spec/sources/norway-synthetic/generated.csv; allowSyntheticNumbers is opted in for the reason every Norwegian fixture opts in."
+  }
+]

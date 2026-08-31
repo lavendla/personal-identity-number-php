@@ -19,6 +19,7 @@ final class FixtureSourceTest extends TestCase
     private const array KNOWN_SOURCES = [
         'skatteverket',
         'medcom',
+        'dvv',
         'public-organization',
         'unissuable',
         'constructed',
@@ -92,10 +93,71 @@ final class FixtureSourceTest extends TestCase
     #[Test]
     public function everyUnissuableFixtureExplainsItself(): void
     {
+        $this->assertSame([], $this->unexplainedFixturesFrom('unissuable'));
+    }
+
+    /**
+     * Exception 3 turns on the individual number being inside the 900-999 block
+     * DVV states it does not issue from, and on DVV having published the code
+     * itself. Neither is visible in the digits, so the fixture has to say --
+     * exactly as `unissuable` has to name the digits the registry cannot issue
+     * and `public-organization` has to state its third digit.
+     */
+    #[Test]
+    public function everyDvvFixtureExplainsItself(): void
+    {
+        $this->assertSame([], $this->unexplainedFixturesFrom('dvv'));
+    }
+
+    /**
+     * Exception 3 covers Finnish personal identity codes and nothing else, so a
+     * fixture from another country marked this way would be leaning on
+     * reasoning that does not reach it.
+     *
+     * Tested against what the fixture *asserts* rather than what its id starts
+     * with. The first version of this check required the id to begin `fi-`,
+     * which was a proxy and immediately a wrong one: the ambiguity corpus names
+     * its files by country pair, so `ambiguous-fi-se-...` is as Finnish as
+     * anything in spec/fixtures/fi/ and failed a check that was only ever
+     * trying to catch a Danish or Swedish fixture claiming the carve-out.
+     */
+    #[Test]
+    public function onlyFixturesAboutAFinnishCodeClaimTheDvvCarveOut(): void
+    {
+        $misplaced = [];
+
+        foreach (FixtureLoader::all() as $id => $case) {
+            if (FixtureLoader::stringField($case[0], 'source') !== 'dvv') {
+                continue;
+            }
+
+            if (! $this->namesFinland($case[0])) {
+                $misplaced[] = $id;
+            }
+        }
+
+        $this->assertSame([], $misplaced);
+    }
+
+    /** @param array<string, mixed> $case */
+    private function namesFinland(array $case): bool
+    {
+        /** @var list<string> $detected */
+        $detected = $case['detected'] ?? [];
+
+        return ($case['issuedBy'] ?? null) === 'FI'
+            || ($case['scheme'] ?? null) === 'fi-personal-identity-code'
+            || ($case['recognizedCountry'] ?? null) === 'FI'
+            || in_array('fi-personal-identity-code', $detected, true);
+    }
+
+    /** @return list<string> */
+    private function unexplainedFixturesFrom(string $source): array
+    {
         $unexplained = [];
 
         foreach (FixtureLoader::all() as $id => $case) {
-            if (FixtureLoader::stringField($case[0], 'source') !== 'unissuable') {
+            if (FixtureLoader::stringField($case[0], 'source') !== $source) {
                 continue;
             }
 
@@ -104,6 +166,6 @@ final class FixtureSourceTest extends TestCase
             }
         }
 
-        $this->assertSame([], $unexplained);
+        return $unexplained;
     }
 }

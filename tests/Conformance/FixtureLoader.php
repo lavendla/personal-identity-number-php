@@ -4,7 +4,10 @@ declare(strict_types=1);
 
 namespace Lavendla\PersonalIdentityNumber\Tests\Conformance;
 
+use DateTimeImmutable;
+use DateTimeZone;
 use FilesystemIterator;
+use Lavendla\PersonalIdentityNumber\ParseOptions;
 use RecursiveDirectoryIterator;
 use RecursiveIteratorIterator;
 use RuntimeException;
@@ -62,6 +65,51 @@ final class FixtureLoader
     public static function optionalStringField(array $case, string $key): ?string
     {
         return isset($case[$key]) ? self::stringField($case, $key) : null;
+    }
+
+    /**
+     * The single reader of a fixture's `options`, shared by ConformanceTest and
+     * dump-golden.php. Before this method existed each enumerated its own four
+     * flags by hand, so both silently missed `allowSyntheticNumbers` in the same
+     * way and agreed with each other on the wrong answer -- see the TypeScript
+     * twin, fixtures.ts's parseOptionsFor(), which spreads the flags instead and
+     * cannot miss one the same way, but reads from this same single place in
+     * spirit: one function per runtime, used by both of that runtime's
+     * consumers.
+     *
+     * @param array<string, mixed> $case
+     */
+    public static function parseOptions(array $case): ParseOptions
+    {
+        $referenceDate = self::optionalStringField($case, 'referenceDate');
+
+        /** @var array<string, bool> $flags */
+        $flags = $case['options'] ?? [];
+
+        $allowCoordinationNumber = $flags['allowCoordinationNumber'] ?? true;
+        $allowOrganizationNumber = $flags['allowOrganizationNumber'] ?? true;
+        $allowUnknownBirthNumber = $flags['allowUnknownBirthNumber'] ?? true;
+        // Defaults false, mirroring ParseOptions' own restrictive default -- a
+        // fixture that wants a synthetic value to parse must opt in explicitly,
+        // same as any real caller would.
+        $allowSyntheticNumbers = $flags['allowSyntheticNumbers'] ?? false;
+
+        if ($referenceDate === null) {
+            return ParseOptions::forCenturyCompleteInput(
+                $allowCoordinationNumber,
+                $allowOrganizationNumber,
+                $allowUnknownBirthNumber,
+                $allowSyntheticNumbers,
+            );
+        }
+
+        return new ParseOptions(
+            new DateTimeImmutable($referenceDate, new DateTimeZone('UTC')),
+            $allowCoordinationNumber,
+            $allowOrganizationNumber,
+            $allowUnknownBirthNumber,
+            $allowSyntheticNumbers,
+        );
     }
 
     /** @return list<string> */

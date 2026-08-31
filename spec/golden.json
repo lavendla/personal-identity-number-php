@@ -1,4 +1,106 @@
 {
+    "a-danish-number-asked-as-swedish-reports-the-country-it-matches": {
+        "canonical": null,
+        "failure": "checksum-mismatch",
+        "formats": null,
+        "outcome": "failed",
+        "recognizedCountry": "DK",
+        "scheme": null
+    },
+    "ambiguous-dk-no-eleven-digits-cannot-be-a-ten-digit-cpr-number": {
+        "canonical": "41836515143",
+        "failure": null,
+        "formats": {
+            "canonical": "41836515143",
+            "display": "418365-15143",
+            "masked": "4183651****",
+            "short": "418365-15143"
+        },
+        "outcome": "parsed",
+        "recognizedCountry": null,
+        "scheme": "no-d-number"
+    },
+    "ambiguous-fi-dk-a-value-valid-under-both-danish-and-finnish-rules-detects-as-two": {
+        "canonical": null,
+        "failure": null,
+        "formats": null,
+        "outcome": "ambiguous",
+        "recognizedCountry": null,
+        "scheme": null
+    },
+    "ambiguous-fi-dk-the-separator-is-what-makes-it-finnish-shaped": {
+        "canonical": "0104909989",
+        "failure": null,
+        "formats": {
+            "canonical": "0104909989",
+            "display": "010490-9989",
+            "masked": "010490****",
+            "short": "010490-9989"
+        },
+        "outcome": "parsed",
+        "recognizedCountry": null,
+        "scheme": "dk-cpr-number"
+    },
+    "ambiguous-fi-no-a-finnish-code-is-not-eleven-digits": {
+        "canonical": "010280-952L",
+        "failure": null,
+        "formats": {
+            "canonical": "010280-952L",
+            "display": "010280-952L",
+            "masked": "010280-****",
+            "short": "010280-952L"
+        },
+        "outcome": "parsed",
+        "recognizedCountry": null,
+        "scheme": "fi-personal-identity-code"
+    },
+    "ambiguous-fi-no-eleven-digits-are-norwegian-and-not-finnish": {
+        "canonical": "18918825033",
+        "failure": null,
+        "formats": {
+            "canonical": "18918825033",
+            "display": "189188-25033",
+            "masked": "1891882****",
+            "short": "189188-25033"
+        },
+        "outcome": "parsed",
+        "recognizedCountry": null,
+        "scheme": "no-national-identity-number"
+    },
+    "ambiguous-fi-se-an-intermediate-character-is-not-a-swedish-separator": {
+        "canonical": "010280-952L",
+        "failure": null,
+        "formats": {
+            "canonical": "010280-952L",
+            "display": "010280-952L",
+            "masked": "010280-****",
+            "short": "010280-952L"
+        },
+        "outcome": "parsed",
+        "recognizedCountry": null,
+        "scheme": "fi-personal-identity-code"
+    },
+    "ambiguous-fi-se-stripping-the-marker-makes-it-nothing-at-all": {
+        "canonical": null,
+        "failure": "not-an-identity-number",
+        "formats": null,
+        "outcome": "failed",
+        "recognizedCountry": null,
+        "scheme": null
+    },
+    "ambiguous-no-se-eleven-digits-are-norwegian-and-nothing-else": {
+        "canonical": "05847510147",
+        "failure": null,
+        "formats": {
+            "canonical": "05847510147",
+            "display": "058475-10147",
+            "masked": "0584751****",
+            "short": "058475-10147"
+        },
+        "outcome": "parsed",
+        "recognizedCountry": null,
+        "scheme": "no-national-identity-number"
+    },
     "ambiguous-se-dk-medcom-number-also-parses-as-swedish": {
         "canonical": null,
         "failure": null,
@@ -114,10 +216,10 @@
     },
     "dk-cpr-number-rejects-a-serial-of-zero": {
         "canonical": null,
-        "failure": "unsupported-scheme",
+        "failure": "not-an-identity-number",
         "formats": null,
         "outcome": "failed",
-        "recognizedCountry": "FI",
+        "recognizedCountry": null,
         "scheme": null
     },
     "dk-cpr-number-rejects-a-serial-of-zero-without-a-separator": {
@@ -175,6 +277,19 @@
         "recognizedCountry": null,
         "scheme": "dk-cpr-number"
     },
+    "fi-personal-identity-code-accepts-a-birth-date-on-the-reference-date": {
+        "canonical": "010280-952L",
+        "failure": null,
+        "formats": {
+            "canonical": "010280-952L",
+            "display": "010280-952L",
+            "masked": "010280-****",
+            "short": "010280-952L"
+        },
+        "outcome": "parsed",
+        "recognizedCountry": null,
+        "scheme": "fi-personal-identity-code"
+    },
     "fi-personal-identity-code-in-lowercase-is-an-invalid-character": {
         "canonical": null,
         "failure": "invalid-character",
@@ -185,6 +300,14 @@
     },
     "fi-personal-identity-code-is-recognized-not-supported": {
         "canonical": null,
+        "failure": "not-an-identity-number",
+        "formats": null,
+        "outcome": "failed",
+        "recognizedCountry": null,
+        "scheme": null
+    },
+    "fi-personal-identity-code-is-recognized-when-asked-as-swedish": {
+        "canonical": null,
         "failure": "unsupported-scheme",
         "formats": null,
         "outcome": "failed",
@@ -193,10 +316,10 @@
     },
     "fi-personal-identity-code-is-recognized-when-nothing-parses-it": {
         "canonical": null,
-        "failure": "unsupported-scheme",
+        "failure": "not-an-identity-number",
         "formats": null,
         "outcome": "failed",
-        "recognizedCountry": "FI",
+        "recognizedCountry": null,
         "scheme": null
     },
     "fi-personal-identity-code-loses-to-a-real-danish-parse": {
@@ -212,49 +335,474 @@
         "recognizedCountry": null,
         "scheme": "dk-cpr-number"
     },
+    "fi-personal-identity-code-needs-no-reference-date": {
+        "canonical": "010280-952L",
+        "failure": null,
+        "formats": {
+            "canonical": "010280-952L",
+            "display": "010280-952L",
+            "masked": "010280-****",
+            "short": "010280-952L"
+        },
+        "outcome": "parsed",
+        "recognizedCountry": null,
+        "scheme": "fi-personal-identity-code"
+    },
+    "fi-personal-identity-code-parses-a-published-test-identity": {
+        "canonical": "010280-952L",
+        "failure": null,
+        "formats": {
+            "canonical": "010280-952L",
+            "display": "010280-952L",
+            "masked": "010280-****",
+            "short": "010280-952L"
+        },
+        "outcome": "parsed",
+        "recognizedCountry": null,
+        "scheme": "fi-personal-identity-code"
+    },
+    "fi-personal-identity-code-reads-a-marker-added-in-2023": {
+        "canonical": "020594X903P",
+        "failure": null,
+        "formats": {
+            "canonical": "020594X903P",
+            "display": "020594X903P",
+            "masked": "020594X****",
+            "short": "020594X903P"
+        },
+        "outcome": "parsed",
+        "recognizedCountry": null,
+        "scheme": "fi-personal-identity-code"
+    },
+    "fi-personal-identity-code-reads-a-two-thousands-marker": {
+        "canonical": "110106A998M",
+        "failure": null,
+        "formats": {
+            "canonical": "110106A998M",
+            "display": "110106A998M",
+            "masked": "110106A****",
+            "short": "110106A998M"
+        },
+        "outcome": "parsed",
+        "recognizedCountry": null,
+        "scheme": "fi-personal-identity-code"
+    },
+    "fi-personal-identity-code-reads-an-odd-individual-number-as-male": {
+        "canonical": "010469-999W",
+        "failure": null,
+        "formats": {
+            "canonical": "010469-999W",
+            "display": "010469-999W",
+            "masked": "010469-****",
+            "short": "010469-999W"
+        },
+        "outcome": "parsed",
+        "recognizedCountry": null,
+        "scheme": "fi-personal-identity-code"
+    },
+    "fi-personal-identity-code-reads-the-b-marker-for-a-two-thousands-birth": {
+        "canonical": "010516B903X",
+        "failure": null,
+        "formats": {
+            "canonical": "010516B903X",
+            "display": "010516B903X",
+            "masked": "010516B****",
+            "short": "010516B903X"
+        },
+        "outcome": "parsed",
+        "recognizedCountry": null,
+        "scheme": "fi-personal-identity-code"
+    },
+    "fi-personal-identity-code-reads-the-w-marker-added-in-2023": {
+        "canonical": "030594W903B",
+        "failure": null,
+        "formats": {
+            "canonical": "030594W903B",
+            "display": "030594W903B",
+            "masked": "030594W****",
+            "short": "030594W903B"
+        },
+        "outcome": "parsed",
+        "recognizedCountry": null,
+        "scheme": "fi-personal-identity-code"
+    },
+    "fi-personal-identity-code-reads-the-y-marker-added-in-2023": {
+        "canonical": "010594Y9021",
+        "failure": null,
+        "formats": {
+            "canonical": "010594Y9021",
+            "display": "010594Y9021",
+            "masked": "010594Y****",
+            "short": "010594Y9021"
+        },
+        "outcome": "parsed",
+        "recognizedCountry": null,
+        "scheme": "fi-personal-identity-code"
+    },
     "fi-personal-identity-code-recognizes-a-marker-added-in-2023": {
         "canonical": null,
-        "failure": "unsupported-scheme",
+        "failure": "not-an-identity-number",
         "formats": null,
         "outcome": "failed",
-        "recognizedCountry": "FI",
+        "recognizedCountry": null,
         "scheme": null
     },
     "fi-personal-identity-code-recognizes-the-2000s-marker": {
         "canonical": null,
-        "failure": "unsupported-scheme",
+        "failure": "not-an-identity-number",
         "formats": null,
         "outcome": "failed",
-        "recognizedCountry": "FI",
+        "recognizedCountry": null,
         "scheme": null
+    },
+    "fi-personal-identity-code-refuses-a-character-the-decree-never-assigned": {
+        "canonical": null,
+        "failure": "not-an-identity-number",
+        "formats": null,
+        "outcome": "failed",
+        "recognizedCountry": null,
+        "scheme": null
+    },
+    "fi-personal-identity-code-refuses-a-wrong-control-character": {
+        "canonical": null,
+        "failure": "checksum-mismatch",
+        "formats": null,
+        "outcome": "failed",
+        "recognizedCountry": null,
+        "scheme": null
+    },
+    "fi-personal-identity-code-refuses-an-impossible-date-under-the-eighteen-hundreds-marker": {
+        "canonical": null,
+        "failure": "impossible-date",
+        "formats": null,
+        "outcome": "failed",
+        "recognizedCountry": null,
+        "scheme": null
+    },
+    "fi-personal-identity-code-refuses-the-twenty-ninth-of-february-in-a-non-leap-century-year": {
+        "canonical": null,
+        "failure": "impossible-date",
+        "formats": null,
+        "outcome": "failed",
+        "recognizedCountry": "DK",
+        "scheme": null
+    },
+    "fi-personal-identity-code-rejects-a-birth-date-after-the-reference-date": {
+        "canonical": null,
+        "failure": "future-birth-date",
+        "formats": null,
+        "outcome": "failed",
+        "recognizedCountry": null,
+        "scheme": null
+    },
+    "fi-personal-identity-code-resolves-the-unpublished-c-marker": {
+        "canonical": null,
+        "failure": "impossible-date",
+        "formats": null,
+        "outcome": "failed",
+        "recognizedCountry": null,
+        "scheme": null
+    },
+    "fi-personal-identity-code-resolves-the-unpublished-d-marker": {
+        "canonical": null,
+        "failure": "impossible-date",
+        "formats": null,
+        "outcome": "failed",
+        "recognizedCountry": null,
+        "scheme": null
+    },
+    "fi-personal-identity-code-resolves-the-unpublished-e-marker": {
+        "canonical": null,
+        "failure": "impossible-date",
+        "formats": null,
+        "outcome": "failed",
+        "recognizedCountry": null,
+        "scheme": null
+    },
+    "fi-personal-identity-code-resolves-the-unpublished-f-marker": {
+        "canonical": null,
+        "failure": "impossible-date",
+        "formats": null,
+        "outcome": "failed",
+        "recognizedCountry": null,
+        "scheme": null
+    },
+    "fi-personal-identity-code-resolves-the-unpublished-u-marker": {
+        "canonical": null,
+        "failure": "impossible-date",
+        "formats": null,
+        "outcome": "failed",
+        "recognizedCountry": null,
+        "scheme": null
+    },
+    "fi-personal-identity-code-resolves-the-unpublished-v-marker": {
+        "canonical": null,
+        "failure": "impossible-date",
+        "formats": null,
+        "outcome": "failed",
+        "recognizedCountry": null,
+        "scheme": null
+    },
+    "no-d-number-and-national-identity-number-share-individual-and-year-but-not-century": {
+        "canonical": "49867652301",
+        "failure": null,
+        "formats": {
+            "canonical": "49867652301",
+            "display": "498676-52301",
+            "masked": "4986765****",
+            "short": "498676-52301"
+        },
+        "outcome": "parsed",
+        "recognizedCountry": null,
+        "scheme": "no-d-number"
+    },
+    "no-d-number-day-boundary-at-seventy-one": {
+        "canonical": "71879930051",
+        "failure": null,
+        "formats": {
+            "canonical": "71879930051",
+            "display": "718799-30051",
+            "masked": "7187993****",
+            "short": "718799-30051"
+        },
+        "outcome": "parsed",
+        "recognizedCountry": null,
+        "scheme": "no-d-number"
+    },
+    "no-d-number-individual-series-500-999-female": {
+        "canonical": "55891067886",
+        "failure": null,
+        "formats": {
+            "canonical": "55891067886",
+            "display": "558910-67886",
+            "masked": "5589106****",
+            "short": "558910-67886"
+        },
+        "outcome": "parsed",
+        "recognizedCountry": null,
+        "scheme": "no-d-number"
+    },
+    "no-d-number-individual-series-500-999-male": {
+        "canonical": "65912384300",
+        "failure": null,
+        "formats": {
+            "canonical": "65912384300",
+            "display": "659123-84300",
+            "masked": "6591238****",
+            "short": "659123-84300"
+        },
+        "outcome": "parsed",
+        "recognizedCountry": null,
+        "scheme": "no-d-number"
+    },
+    "no-d-number-keeps-both-offsets-in-its-canonical-form": {
+        "canonical": "41836515143",
+        "failure": null,
+        "formats": {
+            "canonical": "41836515143",
+            "display": "418365-15143",
+            "masked": "4183651****",
+            "short": "418365-15143"
+        },
+        "outcome": "parsed",
+        "recognizedCountry": null,
+        "scheme": "no-d-number"
+    },
+    "no-d-number-resolves-to-a-future-birth-date": {
+        "canonical": null,
+        "failure": "future-birth-date",
+        "formats": null,
+        "outcome": "failed",
+        "recognizedCountry": null,
+        "scheme": null
+    },
+    "no-national-identity-number-and-d-number-share-individual-and-year-but-not-century": {
+        "canonical": "09867652318",
+        "failure": null,
+        "formats": {
+            "canonical": "09867652318",
+            "display": "098676-52318",
+            "masked": "0986765****",
+            "short": "098676-52318"
+        },
+        "outcome": "parsed",
+        "recognizedCountry": null,
+        "scheme": "no-national-identity-number"
+    },
+    "no-national-identity-number-fails-its-checksum": {
+        "canonical": null,
+        "failure": "checksum-mismatch",
+        "formats": null,
+        "outcome": "failed",
+        "recognizedCountry": null,
+        "scheme": null
+    },
+    "no-national-identity-number-female-individual-number-is-even": {
+        "canonical": "18918825033",
+        "failure": null,
+        "formats": {
+            "canonical": "18918825033",
+            "display": "189188-25033",
+            "masked": "1891882****",
+            "short": "189188-25033"
+        },
+        "outcome": "parsed",
+        "recognizedCountry": null,
+        "scheme": "no-national-identity-number"
+    },
+    "no-national-identity-number-individual-series-500-749-lower-boundary": {
+        "canonical": "09867652318",
+        "failure": null,
+        "formats": {
+            "canonical": "09867652318",
+            "display": "098676-52318",
+            "masked": "0986765****",
+            "short": "098676-52318"
+        },
+        "outcome": "parsed",
+        "recognizedCountry": null,
+        "scheme": "no-national-identity-number"
+    },
+    "no-national-identity-number-individual-series-500-749-upper-boundary": {
+        "canonical": "22829974987",
+        "failure": null,
+        "formats": {
+            "canonical": "22829974987",
+            "display": "228299-74987",
+            "masked": "2282997****",
+            "short": "228299-74987"
+        },
+        "outcome": "parsed",
+        "recognizedCountry": null,
+        "scheme": "no-national-identity-number"
+    },
+    "no-national-identity-number-individual-series-900-999-female": {
+        "canonical": "27909995820",
+        "failure": null,
+        "formats": {
+            "canonical": "27909995820",
+            "display": "279099-95820",
+            "masked": "2790999****",
+            "short": "279099-95820"
+        },
+        "outcome": "parsed",
+        "recognizedCountry": null,
+        "scheme": "no-national-identity-number"
+    },
+    "no-national-identity-number-individual-series-900-999-resolves-nineteen-hundreds": {
+        "canonical": "14855590124",
+        "failure": null,
+        "formats": {
+            "canonical": "14855590124",
+            "display": "148555-90124",
+            "masked": "1485559****",
+            "short": "148555-90124"
+        },
+        "outcome": "parsed",
+        "recognizedCountry": null,
+        "scheme": "no-national-identity-number"
     },
     "no-national-identity-number-is-recognized-not-supported": {
         "canonical": null,
-        "failure": "unsupported-scheme",
+        "failure": "not-an-identity-number",
         "formats": null,
         "outcome": "failed",
-        "recognizedCountry": "NO",
+        "recognizedCountry": null,
         "scheme": null
     },
     "no-national-identity-number-is-recognized-without-a-country-named": {
         "canonical": null,
+        "failure": "not-an-identity-number",
+        "formats": null,
+        "outcome": "failed",
+        "recognizedCountry": null,
+        "scheme": null
+    },
+    "no-national-identity-number-leap-day-in-a-leap-year-parses": {
+        "canonical": "29822477753",
+        "failure": null,
+        "formats": {
+            "canonical": "29822477753",
+            "display": "298224-77753",
+            "masked": "2982247****",
+            "short": "298224-77753"
+        },
+        "outcome": "parsed",
+        "recognizedCountry": null,
+        "scheme": "no-national-identity-number"
+    },
+    "no-national-identity-number-parses-a-synthetic-value-with-the-flag-allowed": {
+        "canonical": "05847510147",
+        "failure": null,
+        "formats": {
+            "canonical": "05847510147",
+            "display": "058475-10147",
+            "masked": "0584751****",
+            "short": "058475-10147"
+        },
+        "outcome": "parsed",
+        "recognizedCountry": null,
+        "scheme": "no-national-identity-number"
+    },
+    "no-national-identity-number-recognition-ignores-the-date": {
+        "canonical": null,
+        "failure": "not-an-identity-number",
+        "formats": null,
+        "outcome": "failed",
+        "recognizedCountry": null,
+        "scheme": null
+    },
+    "no-national-identity-number-refuses-a-synthetic-value-without-the-flag": {
+        "canonical": null,
+        "failure": "synthetic-number",
+        "formats": null,
+        "outcome": "failed",
+        "recognizedCountry": null,
+        "scheme": null
+    },
+    "no-national-identity-number-same-day-and-month-in-a-non-leap-year-is-impossible": {
+        "canonical": null,
+        "failure": "impossible-date",
+        "formats": null,
+        "outcome": "failed",
+        "recognizedCountry": null,
+        "scheme": null
+    },
+    "no-national-identity-number-synthetic-value-is-not-recognized-on-default-options": {
+        "canonical": null,
+        "failure": "not-an-identity-number",
+        "formats": null,
+        "outcome": "failed",
+        "recognizedCountry": null,
+        "scheme": null
+    },
+    "no-national-identity-number-synthetic-value-is-recognized-only-when-opted-in": {
+        "canonical": null,
         "failure": "unsupported-scheme",
         "formats": null,
         "outcome": "failed",
         "recognizedCountry": "NO",
         "scheme": null
     },
-    "no-national-identity-number-recognition-ignores-the-date": {
+    "no-national-identity-number-unissuable-individual-year-combination-is-not-an-identity-number": {
         "canonical": null,
-        "failure": "unsupported-scheme",
+        "failure": "not-an-identity-number",
         "formats": null,
         "outcome": "failed",
-        "recognizedCountry": "NO",
+        "recognizedCountry": null,
         "scheme": null
     },
     "no-national-identity-number-with-a-separator-is-not-recognized": {
         "canonical": null,
         "failure": "not-an-identity-number",
+        "formats": null,
+        "outcome": "failed",
+        "recognizedCountry": null,
+        "scheme": null
+    },
+    "no-national-identity-number-written-month-past-ninety-two-fails-as-an-impossible-date": {
+        "canonical": null,
+        "failure": "impossible-date",
         "formats": null,
         "outcome": "failed",
         "recognizedCountry": null,

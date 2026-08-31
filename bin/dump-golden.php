@@ -18,41 +18,12 @@ require __DIR__ . '/../vendor/autoload.php';
 use Lavendla\PersonalIdentityNumber\Enums\Country;
 use Lavendla\PersonalIdentityNumber\Enums\Format;
 use Lavendla\PersonalIdentityNumber\Exceptions\ParseException;
-use Lavendla\PersonalIdentityNumber\ParseOptions;
 use Lavendla\PersonalIdentityNumber\ParseOutcome;
 use Lavendla\PersonalIdentityNumber\PersonalIdentityNumber;
 use Lavendla\PersonalIdentityNumber\Tests\Conformance\FixtureLoader;
 
 /** Every rendering the dump asks for, in the fixed order they are emitted. */
 const GOLDEN_FORMAT_KEYS = ['canonical', 'display', 'masked', 'short'];
-
-/** @param array<string, mixed> $case */
-function golden_parse_options(array $case): ParseOptions
-{
-    $referenceDate = FixtureLoader::optionalStringField($case, 'referenceDate');
-
-    /** @var array<string, bool> $flags */
-    $flags = $case['options'] ?? [];
-
-    $allowCoordinationNumber = $flags['allowCoordinationNumber'] ?? true;
-    $allowOrganizationNumber = $flags['allowOrganizationNumber'] ?? true;
-    $allowUnknownBirthNumber = $flags['allowUnknownBirthNumber'] ?? true;
-
-    if ($referenceDate === null) {
-        return ParseOptions::forCenturyCompleteInput(
-            $allowCoordinationNumber,
-            $allowOrganizationNumber,
-            $allowUnknownBirthNumber,
-        );
-    }
-
-    return new ParseOptions(
-        new DateTimeImmutable($referenceDate, new DateTimeZone('UTC')),
-        $allowCoordinationNumber,
-        $allowOrganizationNumber,
-        $allowUnknownBirthNumber,
-    );
-}
 
 /** @param array<string, mixed> $case */
 function golden_explain(array $case): ParseOutcome
@@ -64,7 +35,7 @@ function golden_explain(array $case): ParseOutcome
     return PersonalIdentityNumber::explain(
         FixtureLoader::stringField($case, 'input'),
         $issuedBy === null ? null : Country::from($issuedBy),
-        golden_parse_options($case),
+        FixtureLoader::parseOptions($case),
     );
 }
 

@@ -26,6 +26,11 @@ final readonly class ParseOptions
         public bool $allowCoordinationNumber = true,
         public bool $allowOrganizationNumber = true,
         public bool $allowUnknownBirthNumber = true,
+        // The one restrictive default in this class. Every other flag defaults
+        // permissive and lets the caller narrow; this one cannot, because the whole
+        // point is that a synthetic test number must not validate in production. Do
+        // not "fix" this for consistency -- see spec/schemes/no/national-identity-number.json.
+        public bool $allowSyntheticNumbers = false,
     ) {
         $this->referenceDate = $referenceDate?->setTimezone(new DateTimeZone('UTC'));
     }
@@ -39,12 +44,14 @@ final readonly class ParseOptions
         bool $allowCoordinationNumber = true,
         bool $allowOrganizationNumber = true,
         bool $allowUnknownBirthNumber = true,
+        bool $allowSyntheticNumbers = false,
     ): self {
         return new self(
             null,
             $allowCoordinationNumber,
             $allowOrganizationNumber,
             $allowUnknownBirthNumber,
+            $allowSyntheticNumbers,
         );
     }
 }

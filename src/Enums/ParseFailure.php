@@ -25,4 +25,13 @@ enum ParseFailure: string
      * tell them apart.
      */
     case ImplausibleBirthDate = 'implausible-birth-date';
+
+    /**
+     * The number carries Skatteetaten/Digdir's `+80` synthetic-month convention
+     * used for test data, and `allowSyntheticNumbers` was not set to permit it.
+     * A statement about the value, not the request: recognizedCountry is not
+     * suppressed for this failure, since the caller may also have named the
+     * wrong country.
+     */
+    case SyntheticNumber = 'synthetic-number';
 }

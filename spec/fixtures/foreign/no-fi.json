@@ -5,20 +5,20 @@
     "issuedBy": "SE",
     "referenceDate": "2026-08-16",
     "outcome": "failed",
-    "failure": "unsupported-scheme",
-    "recognizedCountry": "NO",
+    "failure": "not-an-identity-number",
+    "recognizedCountry": null,
     "source": "constructed",
-    "provenanceNote": "Eleven digits failing Norway's modulus-11 check: the correct check digits for 131086335 are 27, so this ends 28 and no bearer can exist. Asked as Swedish deliberately — naming a country does not make the recognition less true, and 'you have the wrong country' is the answer a caller who guessed wrong needs."
+    "provenanceNote": "Eleven digits failing Norway's modulus-11 check: the correct check digits for 131086335 are 27, so this ends 28 and no bearer can exist. This fixture's assertions changed once Norway's fødselsnummer scheme was wired up: the recognizer's real-parse tier now asks whether Norway's own registry would accept the number, and a bad check digit means it would not, so this value is no longer reported as Norwegian. Sweden's own schemes also refuse it outright (eleven digits match neither the personal nor the organization shape), so with no country recognized either, the overall answer is the generic 'not-an-identity-number' rather than a named country's refusal. Still asked as Swedish deliberately, unchanged from before — naming a country does not make a recognition less true when one exists, and here none does."
   },
   {
     "id": "no-national-identity-number-is-recognized-without-a-country-named",
     "input": "13108633528",
     "referenceDate": "2026-08-16",
     "outcome": "failed",
-    "failure": "unsupported-scheme",
-    "recognizedCountry": "NO",
+    "failure": "not-an-identity-number",
+    "recognizedCountry": null,
     "source": "constructed",
-    "provenanceNote": "The same digits with no issuedBy, which is the detect() path. Pins the half of the decision the named-country fixture cannot reach: Plan 2 established that a multi-country consultation reports the generic reason, and a recognition is the exception to that, because 'this is a Norwegian number' is an answer to 'what is this?' where 'Sweden says the check digit is wrong' is not."
+    "provenanceNote": "The same digits with no issuedBy, which is the detect() path. This fixture's assertions changed once Norway's fødselsnummer scheme was wired up: with Norway on the real-parse tier, every consulted country now refuses this value outright (Sweden and Denmark by shape, Norway by its own checksum) and none recognizes it, so the ordinary multi-country answer applies -- 'not-an-identity-number' with no recognized country -- rather than the recognition this fixture used to pin."
   },
   {
     "id": "no-national-identity-number-recognition-ignores-the-date",
@@ -26,10 +26,10 @@
     "issuedBy": "SE",
     "referenceDate": "2026-08-16",
     "outcome": "failed",
-    "failure": "unsupported-scheme",
-    "recognizedCountry": "NO",
+    "failure": "not-an-identity-number",
+    "recognizedCountry": null,
     "source": "constructed",
-    "provenanceNote": "Day 31 of month 13, so no bearer can exist for two independent reasons: the date cannot occur and the check digits are wrong (311399123 requires 09, this ends 00). It pins that recognition is shape-only — a value is reported as Norwegian without its date being validated, which is exactly what a recognize-only tier should do and exactly what would be wrong if the country were ever promoted to full support."
+    "provenanceNote": "Day 31 of month 13, so no bearer can exist for two independent reasons: the date cannot occur and the check digits are wrong (311399123 requires 09, this ends 00). This fixture used to pin that recognition is shape-only and date-blind for Norway -- a value reported as Norwegian without its date ever being checked. That stops being true for Norway specifically now that its fødselsnummer scheme is wired up: the real-parse tier refuses this value on its checksum before any date is even decoded, so it is no longer recognized as Norwegian at all, and the fixture can no longer demonstrate date-blindness for Norway -- a checksum-valid but impossible-date Norwegian value would be needed instead, and every constructible one carries Skatteetaten's own synthetic-test convention, which the recognizer's permissive attempt deliberately still refuses (see spec/schemes/no/national-identity-number.json's syntheticNote). That claim held for Finland for one more group and no longer does either: Finland's scheme is real too, so no country in this package is recognized by shape alone any more, and date-blind recognition is no longer a behaviour the corpus can demonstrate for anyone. The shape-only tier itself is still in the code, unreached, because README.md section 12 step 1 requires the next country to ship through it."
   },
   {
     "id": "no-national-identity-number-with-a-separator-is-not-recognized",
@@ -48,10 +48,10 @@
     "issuedBy": "SE",
     "referenceDate": "2026-08-16",
     "outcome": "failed",
-    "failure": "unsupported-scheme",
-    "recognizedCountry": "FI",
+    "failure": "not-an-identity-number",
+    "recognizedCountry": null,
     "source": "constructed",
-    "provenanceNote": "DVV documents 131052-308T as its own example, so this fixture deliberately carries U instead: the modulus-31 control character for 131052308 is T, making this code invalid and leaving it no possible bearer. The letter is also what makes the case reachable at all — before spec/characters.json learned Finland's alphabet this input returned InvalidCharacter."
+    "provenanceNote": "DVV documents 131052-308T as its own example, so this fixture deliberately carries U instead: the modulus-31 control character for 131052308 is T, making this code invalid and leaving it no possible bearer. The letter is also what makes the case reachable at all — before spec/characters.json learned Finland's alphabet this input returned InvalidCharacter. This fixture's assertions changed once Finland's scheme was wired up, exactly as the no- fixtures above changed when Norway's was. Its id still says 'is-recognized' because a fixture id is never edited; what it now pins is the opposite claim, and the more useful one -- a Finnish-shaped value that Finland's own registry would refuse is no longer reported as Finnish. The recognition it used to demonstrate is pinned instead by fi-personal-identity-code-is-recognized-when-asked-as-swedish, which uses a code DVV actually published and so can be valid."
   },
   {
     "id": "fi-personal-identity-code-recognizes-the-2000s-marker",
@@ -59,10 +59,10 @@
     "issuedBy": "SE",
     "referenceDate": "2026-08-16",
     "outcome": "failed",
-    "failure": "unsupported-scheme",
-    "recognizedCountry": "FI",
+    "failure": "not-an-identity-number",
+    "recognizedCountry": null,
     "source": "constructed",
-    "provenanceNote": "Intermediate character A, which decree 690/2022 assigns to births from 1 January 2000. Control character P where the correct one for 010101123 is N, so no bearer can exist."
+    "provenanceNote": "Intermediate character A, which decree 690/2022 assigns to births from 1 January 2000. Control character P where the correct one for 010101123 is N, so no bearer can exist. Assertions changed when Finland's scheme was wired up: the bad control character is now the reason nothing recognizes this value, where before it was invisible because recognition was shape-only. That the marker A is read as a 2000s birth is pinned instead by fi-personal-identity-code-reads-a-two-thousands-marker, on a DVV-published code."
   },
   {
     "id": "fi-personal-identity-code-recognizes-a-marker-added-in-2023",
@@ -70,10 +70,10 @@
     "issuedBy": "SE",
     "referenceDate": "2026-08-16",
     "outcome": "failed",
-    "failure": "unsupported-scheme",
-    "recognizedCountry": "FI",
+    "failure": "not-an-identity-number",
+    "recognizedCountry": null,
     "source": "constructed",
-    "provenanceNote": "Intermediate character Y, one of the letters decree 690/2022 added for 1900s births so codes would not run out; DVV issued the first Y code on 19 December 2023. Control character D where the correct one for 150375246 is C, so no bearer can exist. This is the fixture that would fail if the marker set were encoded from pre-2023 memory rather than from the decree."
+    "provenanceNote": "Intermediate character Y, one of the letters decree 690/2022 added for 1900s births so codes would not run out; DVV issued the first Y code on 19 December 2023. Control character D where the correct one for 150375246 is C, so no bearer can exist. Assertions changed when Finland's scheme was wired up, and this fixture stopped being the one that catches a marker set encoded from pre-2023 memory: it fails on its control character now, before any marker is looked up. That job moved to fi-personal-identity-code-reads-a-marker-added-in-2023, which uses DVV's own Y-marker identity, and to FinnishCenturyResolver's unit tests, which cover every letter the decree assigns including the ones DVV never published."
   },
   {
     "id": "fi-personal-identity-code-in-lowercase-is-an-invalid-character",
@@ -87,26 +87,39 @@
     "provenanceNote": "The same invalid code in lowercase. The normalizer deliberately does not fold case, because PHP's mb_strtoupper and JavaScript's toUpperCase do not agree for every input and a divergence between the runtimes is worse than a lowercase Finnish code being reported as InvalidCharacter. This fixture is what stops that limitation being quietly removed by someone adding a case fold without reading why it is absent."
   },
   {
-    "id": "fi-personal-identity-code-loses-to-a-real-danish-parse",
-    "input": "010490-9989",
-    "issuedBy": "DK",
-    "referenceDate": "2026-08-16",
-    "outcome": "parsed",
-    "scheme": "dk-cpr-number",
-    "canonical": "0104909989",
-    "recognizedCountry": null,
-    "source": "medcom",
-    "provenanceNote": "A published MedCom test number in its display form, which is character-for-character a shape-valid Finnish code: six digits, a hyphen, three digits, a digit control character. It parses as Danish, and this fixture pins that a parse outranks a recognition — without it, nothing stops a later change reclassifying valid Danish numbers as unrecognized foreign ones. The collision is structural rather than coincidental, because modulus-11 is not a Danish validity rule, so most such Finnish codes parse as Danish."
-  },
-  {
     "id": "fi-personal-identity-code-is-recognized-when-nothing-parses-it",
     "input": "010490-998T",
     "issuedBy": "DK",
     "referenceDate": "2026-08-16",
     "outcome": "failed",
-    "failure": "unsupported-scheme",
-    "recognizedCountry": "FI",
+    "failure": "not-an-identity-number",
+    "recognizedCountry": null,
     "source": "constructed",
-    "provenanceNote": "The other side of the fixture above: the same six digits with a letter control character, which no Danish shape can match. Constructed and invalid in Finland too — the correct control character for 010490998 is 9, not T — so it has no bearer in either country. Together the two fixtures pin where the boundary between a parse and a recognition actually falls."
+    "provenanceNote": "The other side of the fixture above: the same six digits with a letter control character, which no Danish shape can match. Constructed and invalid in Finland too — the correct control character for 010490998 is 9, not T — so it has no bearer in either country. Assertions changed when Finland's scheme was wired up. What it pins now is narrower and still worth pinning: a value no country's registry would accept gets the fallback failure and no hint, whichever country was asked. The parse-outranks-a-recognition boundary it used to hold up with its sibling is now held by that sibling plus fi-personal-identity-code-is-recognized-when-asked-as-swedish."
+  },
+  {
+    "id": "no-national-identity-number-synthetic-value-is-recognized-only-when-opted-in",
+    "input": "05847510147",
+    "issuedBy": "SE",
+    "referenceDate": "2026-08-16",
+    "options": {
+      "allowSyntheticNumbers": true
+    },
+    "outcome": "failed",
+    "failure": "unsupported-scheme",
+    "recognizedCountry": "NO",
+    "source": "unissuable",
+    "provenanceNote": "The caller-consent half of the recognition path, and the reason allowSyntheticNumbers travels through to the recognizer rather than being forced false there. Asked as Swedish, which refuses eleven characters outright; the recognizer then asks Norway for a real, permissive parse and Norway accepts, because this caller opted in. Without the flag travelling through, this path would be permanently untestable -- every safely constructible Norwegian value is synthetic, so there would be no valid Norwegian value in existence for a fixture to be recognized by. Paired with the fixture below, which is the same digits on default options. Month 84 (04 + 80), Skatteetaten's synthetic-test marker: a written month of 81-92 is not a calendar month, so no bearer can exist -- see spec/sources/norway-synthetic/README.md and generated.csv's fnr-499-000 row (individual 101, 1975-04-05, male). CLAUDE.md's Exception 1."
+  },
+  {
+    "id": "no-national-identity-number-synthetic-value-is-not-recognized-on-default-options",
+    "input": "05847510147",
+    "issuedBy": "SE",
+    "referenceDate": "2026-08-16",
+    "outcome": "failed",
+    "failure": "not-an-identity-number",
+    "recognizedCountry": null,
+    "source": "unissuable",
+    "provenanceNote": "The same digits with allowSyntheticNumbers left at its default of false, which is the whole assertion: the recognizer refuses this value exactly as the caller's own request would, so no country is reported and the answer is the generic fallback. This is what stops the hint from quietly becoming more permissive than the parse it is advising about -- referenceDate and allowSyntheticNumbers are part of what the caller counts as an acceptable value, not permissions on the request, so neither is relaxed. Month 84 (04 + 80), Skatteetaten's synthetic-test marker: a written month of 81-92 is not a calendar month, so no bearer can exist -- see spec/sources/norway-synthetic/README.md and generated.csv's fnr-499-000 row (individual 101, 1975-04-05, male). CLAUDE.md's Exception 1."
   }
 ]

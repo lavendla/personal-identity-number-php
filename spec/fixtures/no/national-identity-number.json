@@ -1,0 +1,200 @@
+[
+  {
+    "id": "no-national-identity-number-refuses-a-synthetic-value-without-the-flag",
+    "input": "05847510147",
+    "issuedBy": "NO",
+    "referenceDate": "2026-08-16",
+    "outcome": "failed",
+    "failure": "synthetic-number",
+    "source": "unissuable",
+    "provenanceNote": "Month 84 (04 + 80), Skatteetaten's synthetic-test marker: 'Personene har syntetiske fødsels- og d-nummer, der vi har plusset på +80 på måneden.' A month of 81-92 is not a calendar month, so no bearer can exist -- see spec/sources/norway-synthetic/README.md's '+80 convention' section, and generated.csv's fnr-499-000 row (individual 101, 1975-04-05, male). allowSyntheticNumbers defaults to false, so this value is refused exactly as a real caller who never opted in would see it refused."
+  },
+  {
+    "id": "no-national-identity-number-parses-a-synthetic-value-with-the-flag-allowed",
+    "input": "05847510147",
+    "issuedBy": "NO",
+    "referenceDate": "2026-08-16",
+    "options": {
+      "allowSyntheticNumbers": true
+    },
+    "outcome": "parsed",
+    "scheme": "no-national-identity-number",
+    "canonical": "05847510147",
+    "birthDate": "1975-04-05",
+    "gender": "male",
+    "isPerson": true,
+    "formats": {
+      "canonical": "05847510147",
+      "display": "058475-10147",
+      "short": "058475-10147",
+      "masked": "0584751****"
+    },
+    "source": "unissuable",
+    "provenanceNote": "Same digits as the fixture above, with allowSyntheticNumbers opted in -- the caller-consent counterpart to that refusal. Month 84 (04 + 80) is still the synthetic marker Skatteetaten publishes; see spec/sources/norway-synthetic/README.md's '+80 convention' section and generated.csv's fnr-499-000 row. canonical keeps the written month exactly as issued -- the +80 offset is what this fixture is about, not something the parse removes."
+  },
+  {
+    "id": "no-national-identity-number-female-individual-number-is-even",
+    "input": "18918825033",
+    "issuedBy": "NO",
+    "referenceDate": "2026-08-16",
+    "options": {
+      "allowSyntheticNumbers": true
+    },
+    "outcome": "parsed",
+    "scheme": "no-national-identity-number",
+    "canonical": "18918825033",
+    "birthDate": "1988-11-18",
+    "gender": "female",
+    "isPerson": true,
+    "source": "unissuable",
+    "provenanceNote": "Month 91 (11 + 80), the same synthetic marker as every fixture in this file -- see spec/sources/norway-synthetic/README.md. generated.csv's fnr-499-000 row, individual 250: the third individnummer digit is 0, even, so Folkeregisterhåndboken § 2-2-1's gender rule ('Kvinner skal ha like tall og menn ulike tall som siste individsiffer') reads this as female. Paired with the fixture above, whose individual 101 has an odd last digit and reads male, so both genders are exercised."
+  },
+  {
+    "id": "no-national-identity-number-individual-series-500-749-lower-boundary",
+    "input": "09867652318",
+    "issuedBy": "NO",
+    "referenceDate": "2026-08-16",
+    "options": {
+      "allowSyntheticNumbers": true
+    },
+    "outcome": "parsed",
+    "scheme": "no-national-identity-number",
+    "canonical": "09867652318",
+    "birthDate": "1876-06-09",
+    "gender": "male",
+    "isPerson": true,
+    "source": "unissuable",
+    "provenanceNote": "Month 86 (06 + 80); see spec/sources/norway-synthetic/README.md's '+80 convention'. generated.csv's fnr-749-500 row, individual 523, two-digit year 76: Folkeregisterhåndboken § 2-2-1 assigns individnummer 500-749 with year 54-99 to the 1800s, so this resolves to 1876 -- the century table's own floor series. The same individnummer and year, written as a D-number instead, resolve to 2076 under § 2-2-2's different table -- see no-national-identity-number-and-d-number-share-individual-and-year-but-not-century below."
+  },
+  {
+    "id": "no-national-identity-number-individual-series-500-749-upper-boundary",
+    "input": "22829974987",
+    "issuedBy": "NO",
+    "referenceDate": "2026-08-16",
+    "options": {
+      "allowSyntheticNumbers": true
+    },
+    "outcome": "parsed",
+    "scheme": "no-national-identity-number",
+    "canonical": "22829974987",
+    "birthDate": "1899-02-22",
+    "gender": "male",
+    "isPerson": true,
+    "source": "unissuable",
+    "provenanceNote": "Month 82 (02 + 80); see spec/sources/norway-synthetic/README.md. generated.csv's fnr-749-500 row, individual 749, two-digit year 99: the upper edge of both the individnummer range (500-749) and the year range (54-99) that Folkeregisterhåndboken § 2-2-1 assigns to the 1800s. Resolves to 1899, one year short of the table's own boundary with fnr-499-000's 1900s row."
+  },
+  {
+    "id": "no-national-identity-number-leap-day-in-a-leap-year-parses",
+    "input": "29822477753",
+    "issuedBy": "NO",
+    "referenceDate": "2026-08-16",
+    "options": {
+      "allowSyntheticNumbers": true
+    },
+    "outcome": "parsed",
+    "scheme": "no-national-identity-number",
+    "canonical": "29822477753",
+    "birthDate": "2024-02-29",
+    "gender": "male",
+    "isPerson": true,
+    "source": "unissuable",
+    "provenanceNote": "Month 82 (02 + 80); see spec/sources/norway-synthetic/README.md. generated.csv's fnr-999-500 row, individual 777, two-digit year 24: individnummer 500-999 with year 00-39 resolves to the 2000s under § 2-2-1, giving 2024-02-29 -- a real leap day. Paired with the next fixture, whose identical day and month resolve to a non-leap year and therefore an impossible date."
+  },
+  {
+    "id": "no-national-identity-number-same-day-and-month-in-a-non-leap-year-is-impossible",
+    "input": "29822351350",
+    "issuedBy": "NO",
+    "referenceDate": "2026-08-16",
+    "options": {
+      "allowSyntheticNumbers": true
+    },
+    "outcome": "failed",
+    "failure": "impossible-date",
+    "source": "unissuable",
+    "provenanceNote": "Month 82 (02 + 80); see spec/sources/norway-synthetic/README.md. generated.csv's fnr-999-500 row, individual 513, two-digit year 23: resolves to 2023-02-29, and 2023 is not a leap year, so no calendar date exists for it -- a checksum-valid number with no possible bearer for a second, independent reason. The check digits are still correct for the digits as written, which is what keeps this from being a ChecksumMismatch instead."
+  },
+  {
+    "id": "no-national-identity-number-individual-series-900-999-resolves-nineteen-hundreds",
+    "input": "14855590124",
+    "issuedBy": "NO",
+    "referenceDate": "2026-08-16",
+    "options": {
+      "allowSyntheticNumbers": true
+    },
+    "outcome": "parsed",
+    "scheme": "no-national-identity-number",
+    "canonical": "14855590124",
+    "birthDate": "1955-05-14",
+    "gender": "male",
+    "isPerson": true,
+    "source": "unissuable",
+    "provenanceNote": "Month 85 (05 + 80); see spec/sources/norway-synthetic/README.md. generated.csv's fnr-999-900 row, individual 901, two-digit year 55: § 2-2-1 assigns individnummer 900-999 with year 40-99 to the 1900s, giving 1955 -- the fourth and last row of the fødselsnummer century table, distinct from fnr-999-500's 2000s row despite sharing the 900-999 individnummer band."
+  },
+  {
+    "id": "no-national-identity-number-individual-series-900-999-female",
+    "input": "27909995820",
+    "issuedBy": "NO",
+    "referenceDate": "2026-08-16",
+    "options": {
+      "allowSyntheticNumbers": true
+    },
+    "outcome": "parsed",
+    "scheme": "no-national-identity-number",
+    "canonical": "27909995820",
+    "birthDate": "1999-10-27",
+    "gender": "female",
+    "isPerson": true,
+    "source": "unissuable",
+    "provenanceNote": "Month 90 (10 + 80); see spec/sources/norway-synthetic/README.md. generated.csv's fnr-999-900 row, individual 958: the last individnummer digit is 8, even, so this reads female under Folkeregisterhåndboken § 2-2-1's gender rule -- year 99 resolves to 1999, the upper edge of the 900-999/40-99 row."
+  },
+  {
+    "id": "no-national-identity-number-unissuable-individual-year-combination-is-not-an-identity-number",
+    "input": "16834560287",
+    "issuedBy": "NO",
+    "referenceDate": "2026-08-16",
+    "options": {
+      "allowSyntheticNumbers": true
+    },
+    "outcome": "failed",
+    "failure": "not-an-identity-number",
+    "source": "unissuable",
+    "provenanceNote": "Month 83 (03 + 80); see spec/sources/norway-synthetic/README.md. generated.csv's fnr-unissuable-500-899 row, individual 602, two-digit year 45: no row in Folkeregisterhåndboken § 2-2-1's fødselsnummer table covers individnummer 500-899 against year 40-53 -- it falls in the gap between the 500-749/54-99 row and the 900-999/40-99 row. The registry cannot have issued this individnummer/year combination at all, which is a different failure from an impossible calendar date: the century resolver finds no row to resolve against, rather than resolving to a date that does not exist."
+  },
+  {
+    "id": "no-national-identity-number-fails-its-checksum",
+    "input": "18918825032",
+    "issuedBy": "NO",
+    "referenceDate": "2026-08-16",
+    "outcome": "failed",
+    "failure": "checksum-mismatch",
+    "source": "unissuable",
+    "provenanceNote": "generated.csv's fnr-499-000 row (individual 250) ends 33, the correct check digits for 189188250; this ends 32, one digit changed on purpose. No bearer can exist for two independent reasons: the written month is still 91 (11 + 80), Skatteetaten's synthetic marker -- see spec/sources/norway-synthetic/README.md -- and the check digits are wrong regardless. Norway's checksum is verified before the synthetic gate is even consulted, so this fails with ChecksumMismatch rather than SyntheticNumber, whether or not allowSyntheticNumbers is set."
+  },
+  {
+    "id": "no-national-identity-number-and-d-number-share-individual-and-year-but-not-century",
+    "input": "09867652318",
+    "issuedBy": "NO",
+    "referenceDate": "2090-01-01",
+    "options": {
+      "allowSyntheticNumbers": true
+    },
+    "outcome": "parsed",
+    "scheme": "no-national-identity-number",
+    "canonical": "09867652318",
+    "birthDate": "1876-06-09",
+    "gender": "male",
+    "isPerson": true,
+    "source": "unissuable",
+    "provenanceNote": "The single most valuable Norwegian fixture: individnummer 523 and two-digit year 76 read as 1876 here, under Folkeregisterhåndboken § 2-2-1's fødselsnummer table (500-749, year 54-99 -> 1800s). The same individnummer and year, written as a D-number instead (no-d-number-and-national-identity-number-share-individual-and-year-but-not-century, input 49867652301), read as 2076 under § 2-2-2's D-number table (500-999, any year -> 2000s) -- 200 years apart on identical digits. A merged century table would produce one wrong-but-plausible answer for every D-number in the 500-999 series instead of two independently-correct ones. referenceDate is 2090-01-01 rather than this file's usual 2026-08-16 so that the D-number sibling's 2076 birth date is not rejected as a future birth date -- this fixture's own 1876 result is unaffected by the change, since 1876 precedes both reference dates."
+  },
+  {
+    "id": "no-national-identity-number-written-month-past-ninety-two-fails-as-an-impossible-date",
+    "input": "12939030660",
+    "issuedBy": "NO",
+    "referenceDate": "2026-08-16",
+    "outcome": "failed",
+    "failure": "impossible-date",
+    "source": "unissuable",
+    "provenanceNote": "Written month 93 (13 + 80) -- see spec/sources/norway-synthetic/README.md's '+80 convention' section. The convention only ever encodes a real calendar month 1-12, written 81-92; 93 is one past that range and decodes to no calendar month either way: not directly, since 93 is not a month, and not after removing the +80 offset either, since 13 is not a month. No bearer can exist for that reason, distinct from every other fixture in this file, whose written months (81-92) are genuine +80 encodings of a real month. allowSyntheticNumbers is left at its default (false, unset here) and makes no difference to this value either way, because it is not synthetic test data at all -- this fixture pins the bug where a written month past 92 was previously reported as SyntheticNumber, a claim about Skatteetaten's test-data marker that is false for this value; the corrected behaviour is ImpossibleDate. generated.csv's fnr-499-000 row, individual 306 (day 12, month 13, year 1990 as fed to the generator -- digits chosen to decode to no calendar date at all, not a real birth date)."
+  }
+]

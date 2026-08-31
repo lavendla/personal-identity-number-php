@@ -21,6 +21,12 @@ use Lavendla\PersonalIdentityNumber\Enums\Scheme;
  * different absences and the value object has to be able to tell them apart: an
  * organization number has no birth time at all, while a partial coordination
  * number has one whose year is known and whose date cannot be formed.
+ *
+ * `$synthetic` is true only for a value accepted under Skatteetaten/Digdir's
+ * `+80` test-data convention with `allowSyntheticNumbers` set. Every other
+ * scheme has no such convention and passes false explicitly, rather than
+ * defaulting the parameter, so a future scheme that forgets it fails to
+ * compile instead of silently reporting an ordinary number as a test one.
  */
 final readonly class SchemeResult
 {
@@ -29,5 +35,6 @@ final readonly class SchemeResult
         public string $canonical,
         public ?BirthTime $birthTime,
         public ?Gender $gender,
+        public bool $synthetic,
     ) {}
 }

@@ -1,0 +1,13 @@
+[
+  {
+    "id": "a-danish-number-asked-as-swedish-reports-the-country-it-matches",
+    "input": "0104909989",
+    "issuedBy": "SE",
+    "referenceDate": "2026-08-16",
+    "outcome": "failed",
+    "failure": "checksum-mismatch",
+    "recognizedCountry": "DK",
+    "source": "medcom",
+    "provenanceNote": "A published MedCom test number (see spec/fixtures/foreign/PROVENANCE.md's sibling fixture, which uses the same digits with a separator, issued as Danish) asked as Swedish instead. Read as a Swedish coordination number it is shape-valid but Luhn fails, so the failure is checksum-mismatch -- and recognizedCountry still reports DK, because it rides along with whatever failure the asked country's own scheme actually returns, not only UnsupportedScheme. Denmark is a supported country, so this is a genuine hint rather than a shape guess: the recognizer runs Denmark's real scheme permissively, and it actually accepts this exact input -- the same digits parse successfully as Danish when Denmark is the country asked, in the sibling fixture cited above. Still advisory in the sense that matters: acceptance under permissive options is not proof a bearer exists, only that Denmark's registry would not reject the value outright the way Sweden's did."
+  }
+]

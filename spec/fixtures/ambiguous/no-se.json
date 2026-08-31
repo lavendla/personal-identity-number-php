@@ -1,0 +1,18 @@
+[
+  {
+    "id": "ambiguous-no-se-eleven-digits-are-norwegian-and-nothing-else",
+    "input": "05847510147",
+    "referenceDate": "2026-08-16",
+    "options": {
+      "allowSyntheticNumbers": true
+    },
+    "outcome": "parsed",
+    "scheme": "no-national-identity-number",
+    "detected": [
+      "no-national-identity-number"
+    ],
+    "birthDate": "1975-04-05",
+    "source": "unissuable",
+    "provenanceNote": "Norway and Sweden do not collide, and this fixture is the evidence rather than the assumption -- which is the whole point of the pair check in tools/check-scheme-support.mjs. Asked with no country named, so every scheme runs and detect() reports exactly one: Norway writes eleven digits with no separator, Sweden writes ten or twelve with an optional one, and no string is both. The single-entry `detected` array is what asserts the absence; without it the only way to satisfy the gate for this pair would be to invent a collision that is not there. Month 84 (04 + 80), Skatteetaten's synthetic-test marker -- a written month of 81-92 is not a calendar month, so no bearer can exist. See spec/sources/norway-synthetic/README.md and generated.csv's fnr-499-000 row (individual 101, 1975-04-05, male). CLAUDE.md's Exception 1. allowSyntheticNumbers is opted in because every safely constructible Norwegian value carries the convention."
+  }
+]
