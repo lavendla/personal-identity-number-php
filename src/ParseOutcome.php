@@ -54,6 +54,33 @@ final readonly class ParseOutcome
         return $this->candidates;
     }
 
+    /**
+     * The countries the candidates resolved under, in no priority order.
+     *
+     * Never falls back to recognizedCountry(): a caller handed one country could
+     * not then tell whether it parsed the value or merely might have. Merging the
+     * two is a decision, so it belongs at the call site where it is visible.
+     *
+     * @return list<Country>
+     */
+    public function candidateCountries(): array
+    {
+        $countries = [];
+
+        foreach ($this->candidates as $candidate) {
+            $country = $candidate->country();
+
+            // Identity comparison, because array_unique() casts to string by
+            // default and enum instances have no string form. Enum cases are
+            // singletons, so === is exact.
+            if (! in_array($country, $countries, true)) {
+                $countries[] = $country;
+            }
+        }
+
+        return $countries;
+    }
+
     public function isAmbiguous(): bool
     {
         return count($this->candidates) > 1;

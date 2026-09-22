@@ -460,6 +460,20 @@ $candidates = PersonalIdentityNumber::detect('2601012384', $options);
 // two candidates: one SE, one DK
 ```
 
+Where the countries are what you are after rather than the numbers,
+`ParseOutcome::candidateCountries()` derives them from those same candidates:
+
+```php
+$outcome = PersonalIdentityNumber::explain('2601012384', null, $options);
+
+$outcome->candidateCountries(); // [Country::Sweden, Country::Denmark]
+```
+
+A convenience over `candidates()`, not a verdict. The order is the registry's
+and is not a ranking, an outcome that failed reports an empty list, and two
+schemes from one country — a Swedish personal number alongside a Swedish
+organization number — collapse to a single entry.
+
 `ParseOutcome::number()` returns `null` when more than one scheme accepted the
 input, so a caller cannot silently commit a person to the wrong country by
 reading a single result.
@@ -576,6 +590,17 @@ $outcome->failure();           // ParseFailure::ChecksumMismatch
 $outcome->recognizedCountry(); // Country::Denmark
 ```
 
+**Not to be confused with `candidateCountries()`.** That reports countries whose
+schemes *did* accept the value and is empty whenever the outcome failed; this
+reports a country that would have, and only ever appears on a failure. They are
+never both populated, and `candidateCountries()` deliberately does not fall back
+to this one — a caller handed a single country could not otherwise tell which of
+the two it was holding. If you want that fallback, write it where it shows:
+
+```php
+$countries = $outcome->candidateCountries() ?: array_filter([$outcome->recognizedCountry()]);
+```
+
 **What "recognized" means differs by tier, and that difference is the whole
 point.** For a country that has a scheme — Sweden, Denmark, Norway and Finland,
 which is all of them today — this runs that country's own scheme, with the
@@ -670,6 +695,42 @@ lowercase Finnish code resolves to `ParseFailure::InvalidCharacter`. Case foldin
 is deliberately absent because PHP's `mb_strtoupper` and JavaScript's
 `toUpperCase` do not agree for every input, and the two runtimes disagreeing is
 worse than this limitation.
+
+## Test numbers
+
+Seeding a test environment needs identity numbers, and a randomly generated
+valid one very likely belongs to a living person. `TestNumbers` draws from the
+register authorities' own published test ranges instead.
+
+```php
+use Lavendla\PersonalIdentityNumber\Enums\Scheme;
+use Lavendla\PersonalIdentityNumber\TestNumbers;
+
+TestNumbers::pool(Scheme::SePersonalNumber);                       // list<string>
+TestNumbers::draw(Scheme::SePersonalNumber, 'customer:charles');   // one of them
+```
+
+`draw()` is deterministic: the same key returns the same number, here and in the
+TypeScript package, so one fixture can be recognised by name across systems. Keys
+are yours — a fixture ref, a scenario name. Nothing derives one for you, because
+a derived key would change whenever its input did.
+
+Three pools exist: `SePersonalNumber`, `SeCoordinationNumber` and `DkCprNumber`.
+Any other scheme throws `OutOfRangeException` rather than returning nothing — a
+country with no published test range must not look like one that simply has no
+numbers today.
+
+**What a pool guarantees differs by country, and the difference matters.**
+Sweden's range is reserved and cannot be issued to anyone. Denmark's is assigned
+*last* — deferred, not withheld. Read the README beside each range in
+`spec/sources` before treating them as equivalent.
+
+Numbers are sampled evenly across each published corpus rather than taken from
+its head, so a pool spans every birth cohort the source covers. Skatteverket's
+coordination files contain 24 numbers whose implied birth date does not exist —
+29 February in a common year, 31 June — and those are excluded: this package
+rejects them, correctly, so they could not serve a pool whose promise is that a
+drawn value parses.
 
 ## What this package does not do
 
